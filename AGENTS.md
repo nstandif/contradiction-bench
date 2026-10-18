@@ -31,7 +31,7 @@ it is deleted with the worktree.
 |---|---|---|
 | Pairs | `cbench.candidates --k K` | `data/work/pair_test.jsonl`, `data/work/cand_kK.jsonl` |
 | NLI | `cbench.nli <pairs> [--model M] [--limit N]` | `results/cache/nli/<model>/<pairs>.jsonl` |
-| Decision models | `cbench.decide <openrouter\|vercel> <pairs\|native> <alias> [--source cand_k20] [--model slug] [--dry-run]` | `results/cache/decide/<slug>/...` |
+| Decision models | `cbench.decide <openrouter\|vercel\|subq> <pairs\|native> <alias> [--source cand_k20] [--model slug] [--dry-run]` | `results/cache/decide/<slug>/...` |
 | Report | `cbench.evaluate [--source cand_k20]` | `results/report.md`, `results/metrics.json` |
 
 - Scorers resume from their cache. Each cached row stores a fingerprint of the
