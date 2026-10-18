@@ -1,0 +1,28 @@
+tests/test_cbench.py
+  s_68fe34bcaf4223::t_8561713afea99a 47,51-52
+AGENTS.md
+  s_68fe34bcaf4223::t_34efe0d5f96694 52-54,56-63,65-69
+  s_68fe34bcaf4223::t_dfd20f2116244e 30
+  s_68fe34bcaf4223::t_3c9722e1cd16df 4-6
+src/cbench/decide.py
+  s_68fe34bcaf4223::t_d29d90895b11cd 1,4-6
+  s_68fe34bcaf4223::t_9739f441ff4dc1 45
+  s_68fe34bcaf4223::t_98c272ccd06239 55
+  s_68fe34bcaf4223::t_fb404acdba4194 33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a1cd6fec4aa8b08a5dbebddb6ad4fb9c3cf79d3c",
+  "prompts": {},
+  "sessions": {
+    "s_68fe34bcaf4223": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0063655c-30eb-4c81-b5e3-d98329b2aa9f",
+        "model": "unknown"
+      },
+      "human_author": "Nathan Standiford <nbstandiford@gmail.com>"
+    }
+  }
+}
