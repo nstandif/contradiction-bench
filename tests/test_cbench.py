@@ -62,6 +62,16 @@ def test_sweep_excludes_aliases_free_duplicates_and_span_01():
     assert exclusion("typesafe/jev-1.14") is None
 
 
+def test_nli_label_index_handles_case_and_vitaminc_names():
+    from cbench.nli import label_index
+
+    assert label_index({0: "CONTRADICTION", 1: "NEUTRAL", 2: "ENTAILMENT"}, "contradiction") == 0
+    assert label_index({"0": "SUPPORTS", "1": "REFUTES", "2": "NOT ENOUGH INFO"}, "contradiction") == 1
+    assert label_index({"0": "SUPPORTS", "1": "REFUTES", "2": "NOT ENOUGH INFO"}, "entailment") == 0
+    with pytest.raises(ValueError):
+        label_index({0: "entailment", 1: "not_entailment"}, "contradiction")
+
+
 def test_chunked_respects_question_limit():
     chunks = chunked({f"q{i}": {} for i in range(37)}, 16)
     assert [len(c) for c in chunks] == [16, 16, 5]
@@ -112,7 +122,11 @@ def test_evaluator_end_to_end_on_fabricated_caches(tmp_path, monkeypatch):
     report = evaluate.build_report("cand_k20")
 
     assert report["pair_level"]["nli:perfect"]["auroc_test"] == 1.0
-    assert abs(report["pair_level"]["nli:random"]["auroc_test"] - 0.5) < 0.1
+    assert report["pair_level"]["nli:perfect"]["auroc_ci95_test"] == (1.0, 1.0)
+    random_result = report["pair_level"]["nli:random"]
+    assert abs(random_result["auroc_test"] - 0.5) < 0.1
+    low, high = random_result["auroc_ci95_test"]
+    assert low < random_result["auroc_test"] < high and 0.05 < high - low < 0.2
     assert "nli:partial" not in report["pair_level"]
     assert ("nli:partial", "pair_test", f"10/{len(pair_test)}") in report["incomplete"]
 

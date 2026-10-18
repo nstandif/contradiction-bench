@@ -122,6 +122,24 @@ def auroc(labels: np.ndarray, scores: np.ndarray) -> float | None:
     return float(roc_auc_score(labels, scores)) if 0 < labels.sum() < len(labels) else None
 
 
+BOOTSTRAP_ROUNDS = 1000
+BOOTSTRAP_SEED = 0
+
+
+def auroc_interval(labels: np.ndarray, scores: np.ndarray, level: float = 0.95) -> tuple[float, float] | None:
+    """Percentile bootstrap over test items; each item is one document, so this resamples documents."""
+    rng = np.random.default_rng(BOOTSTRAP_SEED)
+    values = []
+    for _ in range(BOOTSTRAP_ROUNDS):
+        idx = rng.integers(0, len(labels), len(labels))
+        if (value := auroc(labels[idx], scores[idx])) is not None:
+            values.append(value)
+    if not values:
+        return None
+    tail = (1 - level) / 2 * 100
+    return float(np.percentile(values, tail)), float(np.percentile(values, 100 - tail))
+
+
 def evaluate_scores(
     scores: dict[str, float],
     label_of: Callable[[str], bool],
@@ -140,6 +158,7 @@ def evaluate_scores(
     return {
         "n_test": len(test),
         "auroc_test": auroc(y_test, s_test),
+        "auroc_ci95_test": auroc_interval(y_test, s_test),
         "threshold": threshold,
         **{f"{k}_test": v for k, v in binary_metrics(y_test, s_test >= threshold).items()},
         "predicted_test": {k: bool(scores[k] >= threshold) for k in test},
@@ -269,6 +288,9 @@ def render(report: dict) -> str:
     lines = ["# Contradiction detection on ContraDoc", ""]
     lines += [
         f"Test split: {report['n_test_docs']} documents. Thresholds tuned for F1 on the dev split.",
+        f"AUROC brackets are 95% bootstrap intervals ({BOOTSTRAP_ROUNDS} resamples of test documents). "
+        "Systems whose intervals overlap should not be ranked against each other; with many systems "
+        "in one table, some will place high by chance.",
         "",
         "## Candidate pairs",
         "",
@@ -284,7 +306,7 @@ def render(report: dict) -> str:
     for name, r in sorted(report["pair_level"].items(), key=lambda x: -(x[1]["auroc_test"] or 0)):
         gap = f"{r['order_gap']:.3f}" if r["order_gap"] is not None else "-"
         lines.append(
-            f"| {name} | {_f(r['auroc_test'])} | {_f(r['f1_test'])} | {_f(r['accuracy_test'])} | {gap} | {r['n_test']} |"
+            f"| {name} | {_auroc(r)} | {_f(r['f1_test'])} | {_f(r['accuracy_test'])} | {gap} | {r['n_test']} |"
         )
     lines += ["", "## Document level", ""]
     yes = report["always_yes"]
@@ -296,7 +318,7 @@ def render(report: dict) -> str:
     for name, r in sorted(report["doc_level"].items(), key=lambda x: -(x[1]["auroc_test"] or 0)):
         loc = r["localization"]
         lines.append(
-            f"| {name} | {_f(r['auroc_test'])} | {_f(r['f1_test'])} | {_f(r['accuracy_test'])} | {_f(r['precision_test'])} "
+            f"| {name} | {_auroc(r)} | {_f(r['f1_test'])} | {_f(r['accuracy_test'])} | {_f(r['precision_test'])} "
             f"| {_f(r['recall_test'])} | {_f(loc['hit@1'])} | {_f(loc['hit@3'])} | {r['n_docs_scored']} |"
         )
     lines += ["", "### Recall by contradiction type (test positives; multi-label)", ""]
@@ -326,6 +348,11 @@ def render(report: dict) -> str:
 
 def _f(value: float | None) -> str:
     return "-" if value is None else f"{value:.3f}"
+
+
+def _auroc(result: dict) -> str:
+    ci = result.get("auroc_ci95_test")
+    return _f(result["auroc_test"]) + (f" [{ci[0]:.3f}, {ci[1]:.3f}]" if ci else "")
 
 
 def build_report(source: str) -> dict:
