@@ -6,3 +6,4 @@ data/
 results/cache/
 .claude/worktrees/
 results/logs/
+.claude/.superpowers/

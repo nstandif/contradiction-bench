@@ -50,6 +50,13 @@ far better than it is.
 | `cbench.decide` | decision-model client for OpenRouter, Vercel AI Gateway, SubQ |
 | `cbench.sweep` | decision-model sweep: `catalog`, `estimate`, `probe`, `run` |
 | `cbench.evaluate` | report with bootstrap CIs, per-type/scope/length breakdowns |
+| `cbench.dashboard` + `app/` | Streamlit explorer over `results/metrics.json`: cost-vs-AUROC leaderboard, compare page |
+
+Run the explorer with `uv sync --group app && uv run streamlit run app/streamlit_app.py`;
+`CBENCH_METRICS=<path>` points it at another metrics file. Costs in the app are
+estimates (catalogue price × `sweep estimate` tokens) and need `data/work`. Compare
+only shows gaps to the best system, because `metrics.json` stores no other paired
+gaps. `tests/test_app.py` skips unless the `app` group is installed.
 
 All scores cache to `results/cache/` as JSONL and every scorer resumes. Each row
 stores a fingerprint of the exact text scored, so changing sentence splitting
