@@ -33,6 +33,28 @@ it is deleted with the worktree.
 | NLI | `cbench.nli <pairs> [--model M] [--limit N]` | `results/cache/nli/<model>/<pairs>.jsonl` |
 | Decision models | `cbench.decide <openrouter\|vercel\|subq> <pairs\|native> <alias> [--source cand_k20] [--model slug] [--dry-run]` | `results/cache/decide/<slug>/...` |
 | Report | `cbench.evaluate [--source cand_k20]` | `results/report.md`, `results/metrics.json` |
+| Sweep | `cbench.sweep <catalog\|estimate\|probe\|run> [--tests pair_test native cand_k20] [--models ...]` | `results/catalog.json`, `results/probe.json`, caches |
+
+The sweep is the normal way to run the decision models:
+
+```sh
+uv run python -m cbench.sweep catalog    # live OpenRouter catalogue + SubQ Snap
+uv run python -m cbench.sweep estimate   # approximate cost, no key needed
+uv run python -m cbench.sweep probe      # one real request per model and test
+uv run python -m cbench.sweep run        # full runs for whatever passed its probe
+uv run python -m cbench.evaluate
+```
+
+- The catalogue (fetched 2026-10-18) has 27 decision models. Excluded: the
+  three `~…-latest` aliases, `:free` duplicates, and the Span-01 family, which
+  scores behaviours in conversations with a different state contract. That
+  leaves 20 OpenRouter models plus SubQ Snap.
+- Some models reportedly have unstated constraints (a 2,000-byte state cap on
+  Clef/Clef Flash, a choice-only Tev1), so the probe decides what runs. A model
+  that fails a test's probe is skipped for that test; partial runs are listed,
+  not scored, by the evaluator.
+- Estimated input cost for all 21 models: about $6 for pair_test + native and
+  about $12 including cand_k20 (JSON chars / 4, so treat as approximate).
 
 - Scorers resume from their cache. Each cached row stores a fingerprint of the
   text it scored, so changing sentence splitting re-scores the affected items

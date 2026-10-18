@@ -52,6 +52,16 @@ def test_resolve_model_maps_aliases_per_gateway():
         resolve_model("openrouter", "snap", None)
 
 
+def test_sweep_excludes_aliases_free_duplicates_and_span_01():
+    from cbench.sweep import exclusion
+
+    assert exclusion("~typesafe/jev-latest")
+    assert exclusion("inception/mercury-decide:free")
+    assert exclusion("respan/span-01-lite")
+    assert exclusion("respan/span-02") is None
+    assert exclusion("typesafe/jev-1.14") is None
+
+
 def test_chunked_respects_question_limit():
     chunks = chunked({f"q{i}": {} for i in range(37)}, 16)
     assert [len(c) for c in chunks] == [16, 16, 5]

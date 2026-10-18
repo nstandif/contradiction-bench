@@ -1,0 +1,182 @@
+{
+  "fetched": "2026-10-18",
+  "source": "https://openrouter.ai/api/v1/models?output_modalities=decisions",
+  "models": [
+    {
+      "route": "openrouter",
+      "id": "cloudflare/clef",
+      "price_per_token": 4.2e-08,
+      "context_length": 65536
+    },
+    {
+      "route": "openrouter",
+      "id": "cloudflare/clef-flash",
+      "price_per_token": 3.8e-08,
+      "context_length": 24576
+    },
+    {
+      "route": "openrouter",
+      "id": "cloudflare/clef-omni",
+      "price_per_token": 1.5e-07,
+      "context_length": 65536
+    },
+    {
+      "route": "openrouter",
+      "id": "inception/mercury-decide",
+      "price_per_token": 2e-08,
+      "context_length": 65536
+    },
+    {
+      "route": "openrouter",
+      "id": "jaredpalmer/kev-4b",
+      "price_per_token": 4.2e-08,
+      "context_length": 8192
+    },
+    {
+      "route": "openrouter",
+      "id": "liquid/d1",
+      "price_per_token": 2e-08,
+      "context_length": 65536
+    },
+    {
+      "route": "openrouter",
+      "id": "liquid/d1-ultra",
+      "price_per_token": 4.2e-08,
+      "context_length": 32768
+    },
+    {
+      "route": "openrouter",
+      "id": "microsoft/microsoft-decision-1",
+      "price_per_token": 4.2e-08,
+      "context_length": 32768
+    },
+    {
+      "route": "openrouter",
+      "id": "nace-ai/drex-v1.5",
+      "price_per_token": 4e-08,
+      "context_length": 131072
+    },
+    {
+      "route": "openrouter",
+      "id": "nace-ai/drex-v2.0",
+      "price_per_token": 6e-08,
+      "context_length": 131072
+    },
+    {
+      "route": "openrouter",
+      "id": "openai/gpt-6-luna-decisions",
+      "price_per_token": 1e-07,
+      "context_length": 1050000
+    },
+    {
+      "route": "openrouter",
+      "id": "perplexity/pplx-decider-flash-v1.2",
+      "price_per_token": 1e-08,
+      "context_length": 262144
+    },
+    {
+      "route": "openrouter",
+      "id": "perplexity/pplx-decider-v1.2",
+      "price_per_token": 2e-08,
+      "context_length": 262144
+    },
+    {
+      "route": "openrouter",
+      "id": "respan/span-02",
+      "price_per_token": 1e-08,
+      "context_length": 131072
+    },
+    {
+      "route": "openrouter",
+      "id": "scaledown/classify-1",
+      "price_per_token": 4e-08,
+      "context_length": 1000000
+    },
+    {
+      "route": "openrouter",
+      "id": "togethercomputer/tev1-4b-experimental",
+      "price_per_token": 4.2e-08,
+      "context_length": 32768
+    },
+    {
+      "route": "openrouter",
+      "id": "typesafe/jev-1.13",
+      "price_per_token": 4.2e-08,
+      "context_length": 262144
+    },
+    {
+      "route": "openrouter",
+      "id": "typesafe/jev-1.14",
+      "price_per_token": 4.2e-08,
+      "context_length": 262144
+    },
+    {
+      "route": "openrouter",
+      "id": "upstage/solar-decide",
+      "price_per_token": 5e-08,
+      "context_length": 524288
+    },
+    {
+      "route": "openrouter",
+      "id": "upstage/solar-decide-flash",
+      "price_per_token": 5e-08,
+      "context_length": 524288
+    },
+    {
+      "route": "subq",
+      "id": "subq-snap-preview",
+      "price_per_token": 5e-08
+    }
+  ],
+  "excluded": [
+    {
+      "route": "openrouter",
+      "id": "inception/mercury-decide:free",
+      "price_per_token": 0.0,
+      "context_length": 65536,
+      "reason": "free duplicate of a paid model"
+    },
+    {
+      "route": "openrouter",
+      "id": "respan/span-01",
+      "price_per_token": 2e-08,
+      "context_length": 0,
+      "reason": "conversation behaviour scorer with a different state contract"
+    },
+    {
+      "route": "openrouter",
+      "id": "respan/span-01-lite",
+      "price_per_token": 0.0,
+      "context_length": 0,
+      "reason": "conversation behaviour scorer with a different state contract"
+    },
+    {
+      "route": "openrouter",
+      "id": "respan/span-01-lite:free",
+      "price_per_token": 0.0,
+      "context_length": 0,
+      "reason": "free duplicate of a paid model"
+    },
+    {
+      "route": "openrouter",
+      "id": "~perplexity/pplx-decider-flash-latest",
+      "price_per_token": 1e-08,
+      "context_length": 262144,
+      "reason": "alias that redirects to a pinned model already in the list"
+    },
+    {
+      "route": "openrouter",
+      "id": "~perplexity/pplx-decider-latest",
+      "price_per_token": 2e-08,
+      "context_length": 262144,
+      "reason": "alias that redirects to a pinned model already in the list"
+    },
+    {
+      "route": "openrouter",
+      "id": "~typesafe/jev-latest",
+      "price_per_token": 4.2e-08,
+      "context_length": 262144,
+      "reason": "alias that redirects to a pinned model already in the list"
+    }
+  ]
+}

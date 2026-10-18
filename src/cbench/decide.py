@@ -217,39 +217,56 @@ def cached_fingerprints(path) -> dict[str, str]:
     return {(row := json.loads(line))["key"]: row.get("fingerprint") for line in path.open()}
 
 
-async def run(args: argparse.Namespace) -> None:
-    gateway = GATEWAYS[args.gateway]
-    model = resolve_model(args.gateway, args.alias, args.model)
+def work_items(mode: str, source: str) -> list[Pair] | list[Doc]:
+    return read_pairs(source) if mode == "pairs" else list(load_docs())
 
-    items: list[Pair] | list[Doc]
-    if args.mode == "pairs":
-        items = read_pairs(args.source)
+
+def first_request(model: str, mode: str, items: list[Pair] | list[Doc]) -> dict:
+    if mode == "pairs":
         state, questions = {"sentence_a": items[0].a, "sentence_b": items[0].b}, pair_questions()
     else:
-        items = list(load_docs())
         state, questions = native_state(items[0]), native_questions(items[0])
+    return {"model": model, "state": state, "questions": chunked(questions, QUESTIONS_PER_REQUEST)[0]}
 
-    out = cache_path(model, args.mode, args.source if args.mode == "pairs" else "all")
+
+def require_key(gateway: Gateway) -> str:
+    if key := load_env(gateway.key_env):
+        return key
+    raise SystemExit(f"set {gateway.key_env} in the environment or in {ROOT / '.env'}")
+
+
+@dataclass
+class RunSummary:
+    scored: int = 0
+    failed: int = 0
+    first_error: str | None = None
+
+
+async def score_model(
+    gateway_name: str,
+    model: str,
+    mode: str,
+    source: str,
+    *,
+    limit: int | None = None,
+    concurrency: int = 8,
+    log=print,
+) -> RunSummary:
+    gateway = GATEWAYS[gateway_name]
+    items = work_items(mode, source)
+    out = cache_path(model, mode, source if mode == "pairs" else "all")
     done = cached_fingerprints(out)
     pending = [it for it in items if done.get(_key(it)) != it.fingerprint]
-    if args.limit is not None:
-        pending = random.Random(SAMPLE_SEED).sample(pending, min(args.limit, len(pending)))
-    print(f"{args.gateway}/{model} {args.mode}: {len(items) - len(pending)} cached, {len(pending)} pending")
+    if limit is not None:
+        pending = random.Random(SAMPLE_SEED).sample(pending, min(limit, len(pending)))
+    log(f"{gateway_name}/{model} {mode}: {len(items) - len(pending)} cached, {len(pending)} pending")
 
-    if args.dry_run:
-        first = chunked(questions, QUESTIONS_PER_REQUEST)[0]
-        print(f"POST {gateway.url}")
-        print(json.dumps({"model": model, "state": state, "questions": first}, indent=2)[:3000])
-        return
-
-    key = load_env(gateway.key_env)
-    if not key:
-        raise SystemExit(f"set {gateway.key_env} in the environment or in {ROOT / '.env'}")
-
-    client = Client(gateway, model, key, args.concurrency)
-    scorer = score_pair if args.mode == "pairs" else score_doc
+    summary = RunSummary()
+    if not pending:
+        return summary
+    client = Client(gateway, model, require_key(gateway), concurrency)
+    scorer = score_pair if mode == "pairs" else score_doc
     out.parent.mkdir(parents=True, exist_ok=True)
-    failures = 0
     try:
         with out.open("a") as f:
             tasks = [asyncio.create_task(scorer(client, it)) for it in pending]
@@ -257,15 +274,27 @@ async def run(args: argparse.Namespace) -> None:
                 try:
                     row = await task
                 except (RuntimeError, KeyError, TypeError, ValueError) as error:
-                    failures += 1
-                    print(f"failed: {error!r}"[:600], flush=True)
+                    summary.failed += 1
+                    summary.first_error = summary.first_error or f"{error!r}"[:600]
+                    log(f"failed: {error!r}"[:600])
                     continue
+                summary.scored += 1
                 f.write(json.dumps(row) + "\n")
                 f.flush()
                 if n % 50 == 0 or n == len(tasks):
-                    print(f"{n}/{len(tasks)} done, {failures} failed", flush=True)
+                    log(f"{gateway_name}/{model} {mode}: {n}/{len(tasks)} done, {summary.failed} failed")
     finally:
         await client.aclose()
+    return summary
+
+
+async def run(args: argparse.Namespace) -> None:
+    model = resolve_model(args.gateway, args.alias, args.model)
+    if args.dry_run:
+        print(f"POST {GATEWAYS[args.gateway].url}")
+        print(json.dumps(first_request(model, args.mode, work_items(args.mode, args.source)), indent=2)[:3000])
+        return
+    await score_model(args.gateway, model, args.mode, args.source, limit=args.limit, concurrency=args.concurrency)
 
 
 def _key(item: Pair | Doc) -> str:
