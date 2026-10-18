@@ -1,0 +1,37 @@
+src/cbench/sweep.py
+  s_68fe34bcaf4223::t_42356877f7ed67 87-95,98,102-104
+AGENTS.md
+  s_68fe34bcaf4223::t_a21a1b2ecab9ee 133-134
+  s_68fe34bcaf4223::t_3d248f821bccb4 152-161
+  s_68fe34bcaf4223::t_14295ef45afced 79-85
+tests/test_cbench.py
+  s_68fe34bcaf4223::t_53cb43dffc7c70 141-144
+  s_68fe34bcaf4223::t_530073b4c4e987 75-85
+src/cbench/evaluate.py
+  s_68fe34bcaf4223::t_2c28b4e0525efb 390-396
+  s_68fe34bcaf4223::t_094e996950501e 288
+  s_68fe34bcaf4223::t_3009aca28e217a 351-353,358
+  s_68fe34bcaf4223::t_c75031cc5abeda 229
+  s_68fe34bcaf4223::t_8fc5e2d8c00348 342,346
+  s_68fe34bcaf4223::t_d712de5f127cc8 192
+  s_68fe34bcaf4223::t_f799f5c71b7547 143-175
+  s_68fe34bcaf4223::t_f7ed8f78b76e22 328-330
+src/cbench/decide.py
+  s_68fe34bcaf4223::t_ab62ff2e5b4944 252,257
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "90c874e9c6c75b028c385580aa09bdd33e9ef31b",
+  "prompts": {},
+  "sessions": {
+    "s_68fe34bcaf4223": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0063655c-30eb-4c81-b5e3-d98329b2aa9f",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Nathan Standiford <nbstandiford@gmail.com>"
+    }
+  }
+}
