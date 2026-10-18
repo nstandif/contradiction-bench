@@ -1,8 +1,9 @@
-"""Score ContraDoc with decision models through OpenRouter or Vercel AI Gateway.
+"""Score ContraDoc with decision models through OpenRouter, Vercel AI Gateway, or SubQ.
 
 Both gateways accept the TypeSafe request shape, {model, state, questions}
-with noul/choice questions, for every decision model they carry, so one
-request format covers every model and wording is identical across them.
+with noul/choice questions, for every decision model they carry. SubQ Snap is
+on neither gateway, so it is called on SubQ's own API, which takes the same
+shape. One request format covers every model and wording is identical.
 
 Modes:
 - pairs: one request per sentence pair (same pairs as the NLI run). A 3-way
@@ -29,7 +30,7 @@ from cbench.paths import CACHE, ROOT
 RETRY_STATUSES = {429, 500, 502, 503, 504}
 MAX_ATTEMPTS = 6
 SAMPLE_SEED = 0
-QUESTIONS_PER_REQUEST = 16
+QUESTIONS_PER_REQUEST = 16  # SubQ's cap; applied to every model so requests stay identical
 
 
 @dataclass(frozen=True)
@@ -41,6 +42,7 @@ class Gateway:
 GATEWAYS = {
     "openrouter": Gateway("https://openrouter.ai/api/alpha/decisions", "OPENROUTER_API_KEY"),
     "vercel": Gateway("https://ai-gateway.vercel.sh/typesafe/v1/systemone", "AI_GATEWAY_API_KEY"),
+    "subq": Gateway("https://api.subq.ai/v1/systemone", "SUBQ_API_KEY"),
 }
 
 # Catalogue slugs checked 2026-10-18. Pass --model for anything else.
@@ -50,6 +52,7 @@ MODELS = {
     "msft": {"openrouter": "microsoft/microsoft-decision-1", "vercel": "microsoft/microsoft-decision-1"},
     "span": {"openrouter": "respan/span-02"},
     "luna": {"openrouter": "openai/gpt-6-luna-decisions", "vercel": "openai/gpt-6-luna-decisions"},
+    "snap": {"subq": "subq-snap-preview"},
 }
 
 PAIR_INSTRUCTIONS = "Both sentences come from the same document. How does `sentence_b` relate to `sentence_a`?"

@@ -1,9 +1,9 @@
 # contradiction-bench
 
 Benchmark of contradiction detectors on ContraDoc (Li et al., NAACL 2024):
-hosted decision models (Jev, Perplexity Decider, Microsoft-Decision-1, Span-02,
-GPT-6 Luna Decisions), reached through OpenRouter or Vercel AI Gateway, against
-3-way NLI models run locally.
+hosted decision models (Jev, Perplexity Decider v1.2, Microsoft-Decision-1,
+Span-02, GPT-6 Luna Decisions through OpenRouter or Vercel AI Gateway; SubQ Snap
+through its own API) against 3-way NLI models run locally.
 
 ## Why the full dataset
 
@@ -22,7 +22,7 @@ uv run pytest
 
 There is no GPU on the dev machine. Keys come from the environment or a
 gitignored `.env` at the project root: `OPENROUTER_API_KEY` or
-`AI_GATEWAY_API_KEY`. A git worktree has its own root, so copy `.env` into it;
+`AI_GATEWAY_API_KEY`, plus `SUBQ_API_KEY` for SubQ Snap. A git worktree has its own root, so copy `.env` into it;
 it is deleted with the worktree.
 
 ## Pipeline
@@ -44,22 +44,24 @@ it is deleted with the worktree.
 
 ## Gateways and models (catalogues checked 2026-10-18)
 
-Both gateways take the TypeSafe body (`{model, state, questions}`, `noul`/`choice`):
-OpenRouter at `openrouter.ai/api/alpha/decisions`, Vercel at
-`ai-gateway.vercel.sh/typesafe/v1/systemone`.
+All three routes take the TypeSafe body (`{model, state, questions}`,
+`noul`/`choice`): OpenRouter at `openrouter.ai/api/alpha/decisions`, Vercel at
+`ai-gateway.vercel.sh/typesafe/v1/systemone`, SubQ at `api.subq.ai/v1/systemone`.
 
-| Alias | OpenRouter slug | Vercel slug | $/M input |
-|---|---|---|---|
-| `jev` | `typesafe/jev-1.13` | `typesafe-ai/jev-1.13.0` | 0.042 |
-| `pplx` | `perplexity/pplx-decider-v1.2` | same | 0.02 |
-| `msft` | `microsoft/microsoft-decision-1` | same | 0.042 |
-| `span` | `respan/span-02` | not listed | 0.01 |
-| `luna` | `openai/gpt-6-luna-decisions` | same | 0.10 |
+| Alias | OpenRouter slug | Vercel slug | SubQ | $/M input |
+|---|---|---|---|---|
+| `jev` | `typesafe/jev-1.13` | `typesafe-ai/jev-1.13.0` | - | 0.042 |
+| `pplx` | `perplexity/pplx-decider-v1.2` | same | - | 0.02 |
+| `msft` | `microsoft/microsoft-decision-1` | same | - | 0.042 |
+| `span` | `respan/span-02` | not listed | - | 0.01 |
+| `luna` | `openai/gpt-6-luna-decisions` | same | - | 0.10 |
+| `snap` | not listed | not listed | `subq-snap-preview` | 0.05 |
 
-- **Not reachable through either gateway:** SubQ Snap (`subq-snap-preview`,
-  direct API only at `api.subq.ai`) and exact `pplx-decider-v1.1`. Perplexity
-  now serves v1.2 for the v1.1 name; exact v1.1 needs the open 27B weights on a
-  CUDA GPU with about 49 GB.
+- **Perplexity Decider is v1.2 by choice.** v1.1 is gone from both gateways and
+  from Perplexity's API (the v1.1 name now serves v1.2).
+- **SubQ Snap** is in public preview with limited capacity (new accounts may be
+  waitlisted) and allows at most 16 questions per request, which is why every
+  model gets 16-question chunks in native mode.
 - Microsoft-Decision-1 and Jev-on-Vercel have 32K context; native mode stays
   well under that (ContraDoc documents are at most about 2,200 tokens).
 - Native mode sends 16 questions per request, so a document's state is billed

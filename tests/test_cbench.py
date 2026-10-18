@@ -44,9 +44,12 @@ def test_resolve_model_maps_aliases_per_gateway():
     assert resolve_model("openrouter", "jev", None) == "typesafe/jev-1.13"
     assert resolve_model("vercel", "jev", None) == "typesafe-ai/jev-1.13.0"
     assert resolve_model("vercel", None, "any/slug") == "any/slug"
+    assert resolve_model("subq", "snap", None) == "subq-snap-preview"
     assert "vercel" not in MODELS["span"]
     with pytest.raises(SystemExit):
         resolve_model("vercel", "span", None)
+    with pytest.raises(SystemExit):
+        resolve_model("openrouter", "snap", None)
 
 
 def test_chunked_respects_question_limit():
