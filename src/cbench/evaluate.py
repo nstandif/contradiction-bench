@@ -2,6 +2,8 @@
 
 Thresholds are tuned for F1 on the dev split and applied to test. AUROC is the
 headline number because max-over-pairs scores drift with document length.
+Cached rows whose fingerprint no longer matches the current text are ignored,
+and a system is reported only once it has scored every item of an input.
 """
 
 import argparse
@@ -16,7 +18,7 @@ from sklearn.metrics import roc_auc_score
 
 from cbench.candidates import DEFAULT_K, candidate_recall, read_pairs
 from cbench.data import Doc, docs_by_id, load_docs, split_ids
-from cbench.paths import CACHE, RESULTS
+from cbench.paths import CACHE, RESULTS, WORK
 
 
 @dataclass
@@ -26,35 +28,62 @@ class System:
     doc_scores: dict[str, dict[str, float]] = field(default_factory=dict)
     sentence_scores: dict[str, dict[str, list[float]]] = field(default_factory=dict)
     order_gap: dict[str, float] = field(default_factory=dict)
+    incomplete: dict[str, str] = field(default_factory=dict)
 
 
 def read_jsonl(path: Path) -> list[dict]:
     return [json.loads(line) for line in path.open()] if path.exists() else []
 
 
+def current_rows(path: Path, expected: dict[str, str]) -> list[dict]:
+    """Rows for items that still exist with identical text; the last write wins."""
+    rows = {r["key"]: r for r in read_jsonl(path) if expected.get(r["key"]) == r.get("fingerprint")}
+    return list(rows.values())
+
+
+def pair_fingerprints(source: str) -> dict[str, str] | None:
+    if not (WORK / f"{source}.jsonl").exists():
+        return None
+    return {p.key: p.fingerprint for p in read_pairs(source)}
+
+
+def _add_pair_scores(system: System, source: str, rows: list[dict], expected: int, score) -> None:
+    if len(rows) < expected:
+        system.incomplete[source] = f"{len(rows)}/{expected}"
+        return
+    system.pair_scores[source] = {r["key"]: score(r) for r in rows}
+
+
 def discover_systems() -> list[System]:
     systems = []
     for model_dir in sorted((CACHE / "nli").glob("*")):
         system = System(f"nli:{model_dir.name.split('__')[-1]}")
-        for path in model_dir.glob("*.jsonl"):
-            system.pair_scores[path.stem] = {
-                r["key"]: max(r["p_contra_ab"], r["p_contra_ba"]) for r in read_jsonl(path)
-            }
+        for path in sorted(model_dir.glob("*.jsonl")):
+            if (expected := pair_fingerprints(path.stem)) is None:
+                continue
+            rows = current_rows(path, expected)
+            _add_pair_scores(system, path.stem, rows, len(expected), lambda r: max(r["p_contra_ab"], r["p_contra_ba"]))
         systems.append(system)
-    for model_dir in sorted((CACHE / "decide").glob("*/*")):
-        system = System(f"{model_dir.parent.name}:{model_dir.name}")
-        for path in model_dir.glob("pairs_*.jsonl"):
-            rows = read_jsonl(path)
+
+    doc_fingerprints = {d.id: d.fingerprint for d in load_docs()}
+    for model_dir in sorted((CACHE / "decide").glob("*")):
+        system = System(model_dir.name.replace("__", "/"))
+        for path in sorted(model_dir.glob("pairs_*.jsonl")):
             source = path.stem.removeprefix("pairs_")
-            system.pair_scores[source] = {
-                r["key"]: (r["p_contra_forward"] + r["p_contra_backward"]) / 2 for r in rows
-            }
-            if rows:
+            if (expected := pair_fingerprints(source)) is None:
+                continue
+            rows = current_rows(path, expected)
+            _add_pair_scores(
+                system, source, rows, len(expected), lambda r: (r["p_contra_forward"] + r["p_contra_backward"]) / 2
+            )
+            if source in system.pair_scores:
                 system.order_gap[source] = float(
                     np.mean([abs(r["p_contra_forward"] - r["p_contra_backward"]) for r in rows])
                 )
-        native = read_jsonl(model_dir / "native_all.jsonl")
-        if native:
+        native = current_rows(model_dir / "native_all.jsonl", doc_fingerprints)
+        if native and len(native) < len(doc_fingerprints):
+            system.incomplete["native"] = f"{len(native)}/{len(doc_fingerprints)}"
+        elif native:
             system.doc_scores["native:document"] = {r["key"]: r["p_document"] for r in native}
             system.doc_scores["native:max-sentence"] = {r["key"]: max(r["p_sentences"]) for r in native}
             system.sentence_scores["native"] = {r["key"]: r["p_sentences"] for r in native}
@@ -147,25 +176,19 @@ def pair_level(systems: list[System]) -> dict:
     return results
 
 
-def doc_scores_from_pairs(pair_scores: dict[str, float], source: str) -> tuple[dict, dict]:
-    """Doc score = max pair score; sentence score = max over pairs containing it."""
-    expected: dict[str, int] = defaultdict(int)
-    for p in read_pairs(source):
-        expected[p.doc_id] += 1
-    seen: dict[str, int] = defaultdict(int)
+def doc_scores_from_pairs(pair_scores: dict[str, float]) -> tuple[dict, dict]:
+    """Doc score = max pair score; sentence score = max over pairs containing it.
+
+    `pair_scores` is complete for its source (enforced in discover_systems).
+    """
     doc_max: dict[str, float] = {}
     sentence_max: dict[str, dict[int, float]] = defaultdict(dict)
     for key, score in pair_scores.items():
         doc_id, i, j = key.rsplit(":", 2)
-        seen[doc_id] += 1
         doc_max[doc_id] = max(doc_max.get(doc_id, 0.0), score)
         for s in (int(i), int(j)):
             sentence_max[doc_id][s] = max(sentence_max[doc_id].get(s, 0.0), score)
-    complete = {d for d, n in expected.items() if seen[d] == n}
-    return (
-        {d: s for d, s in doc_max.items() if d in complete},
-        {d: sentence_max[d] for d in complete},
-    )
+    return doc_max, dict(sentence_max)
 
 
 def localization(sentence_scores: dict, docs: dict[str, Doc], splits: dict[str, str]) -> dict:
@@ -192,7 +215,7 @@ def doc_level(systems: list[System], source: str) -> dict:
     configurations = []
     for system in systems:
         if source in system.pair_scores:
-            doc_scores, sentence_scores = doc_scores_from_pairs(system.pair_scores[source], source)
+            doc_scores, sentence_scores = doc_scores_from_pairs(system.pair_scores[source])
             configurations.append((f"{system.name} [{source}]", doc_scores, sentence_scores))
         for name, scores in system.doc_scores.items():
             configurations.append((f"{system.name} [{name}]", scores, system.sentence_scores.get("native", {})))
@@ -257,10 +280,12 @@ def render(report: dict) -> str:
     for k, r in report["candidate_recall"].items():
         lines.append(f"| {k} | {r['gold_pair_recall']:.1%} of {r['docs_with_gold_pair']} | {r['evidence_sentence_recall']:.1%} of {r['docs_with_evidence']} |")
     lines += ["", "## Pair level (gold pairs vs hardest pair in clean documents)", ""]
-    lines += ["| System | AUROC | F1 | Acc | Order gap |", "|---|---|---|---|---|"]
+    lines += ["| System | AUROC | F1 | Acc | Order gap | n test |", "|---|---|---|---|---|---|"]
     for name, r in sorted(report["pair_level"].items(), key=lambda x: -(x[1]["auroc_test"] or 0)):
         gap = f"{r['order_gap']:.3f}" if r["order_gap"] is not None else "-"
-        lines.append(f"| {name} | {_f(r['auroc_test'])} | {_f(r['f1_test'])} | {_f(r['accuracy_test'])} | {gap} |")
+        lines.append(
+            f"| {name} | {_f(r['auroc_test'])} | {_f(r['f1_test'])} | {_f(r['accuracy_test'])} | {gap} | {r['n_test']} |"
+        )
     lines += ["", "## Document level", ""]
     yes = report["always_yes"]
     lines += [
@@ -293,6 +318,9 @@ def render(report: dict) -> str:
                 v = report["doc_level"][c]["recall_by"]["scope"].get(s)
                 cells.append(f"{v['recall']:.2f} (n={v['n']})" if v else "-")
             lines.append(f"| {s} | " + " | ".join(cells) + " |")
+    if report["incomplete"]:
+        lines += ["", "## Not reported (partial runs)", ""]
+        lines += [f"- {system} [{source}]: {progress}" for system, source, progress in report["incomplete"]]
     return "\n".join(lines) + "\n"
 
 
@@ -300,23 +328,28 @@ def _f(value: float | None) -> str:
     return "-" if value is None else f"{value:.3f}"
 
 
+def build_report(source: str) -> dict:
+    docs, splits = load_docs(), split_ids()
+    systems = discover_systems()
+    return {
+        "n_test_docs": sum(1 for d in docs if splits[d.id] == "test"),
+        "candidate_recall": {
+            name.removeprefix("cand_k"): candidate_recall(docs, read_pairs(name))
+            for name in sorted(p.stem for p in WORK.glob("cand_k*.jsonl"))
+        },
+        "pair_level": pair_level(systems),
+        "doc_level": doc_level(systems, source),
+        "always_yes": always_yes(docs, splits),
+        "incomplete": [(s.name, src, progress) for s in systems for src, progress in s.incomplete.items()],
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", default=f"cand_k{DEFAULT_K}")
     args = parser.parse_args()
 
-    docs, splits = load_docs(), split_ids()
-    systems = discover_systems()
-    report = {
-        "n_test_docs": sum(1 for d in docs if splits[d.id] == "test"),
-        "candidate_recall": {
-            name.removeprefix("cand_k"): candidate_recall(docs, read_pairs(name))
-            for name in sorted(p.stem for p in (CACHE.parent.parent / "data" / "work").glob("cand_k*.jsonl"))
-        },
-        "pair_level": pair_level(systems),
-        "doc_level": doc_level(systems, args.source),
-        "always_yes": always_yes(docs, splits),
-    }
+    report = build_report(args.source)
     RESULTS.mkdir(parents=True, exist_ok=True)
     (RESULTS / "metrics.json").write_text(json.dumps(report, indent=2))
     (RESULTS / "report.md").write_text(render(report))

@@ -1,5 +1,6 @@
 """Load ContraDoc, split documents into sentences, and locate the gold evidence."""
 
+import hashlib
 import json
 import re
 from dataclasses import dataclass
@@ -26,6 +27,10 @@ class Doc:
     scopes: tuple[str, ...] = ()
     evidence_idx: tuple[int, ...] = ()
     ref_idx: tuple[int, ...] = ()
+
+    @property
+    def fingerprint(self) -> str:
+        return fingerprint(*self.sentences)
 
     @property
     def gold_pairs(self) -> set[tuple[int, int]]:
@@ -82,6 +87,11 @@ def split_ids() -> dict[str, str]:
     )
     dev = set(dev)
     return {d.id: "dev" if d.id in dev else "test" for d in docs}
+
+
+def fingerprint(*texts: str) -> str:
+    """Ties cached scores to the exact text scored, so re-splitting invalidates them."""
+    return hashlib.sha1("\x1f".join(texts).encode()).hexdigest()[:16]
 
 
 def docs_by_id() -> dict[str, Doc]:

@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import random
 import time
 
 import torch
@@ -12,6 +13,7 @@ from cbench.paths import CACHE
 
 DEFAULT_MODEL = "MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli"
 MAX_TOKENS = 256
+SAMPLE_SEED = 0
 
 
 class NLIScorer:
@@ -41,6 +43,7 @@ class NLIScorer:
                 rows.append(
                     {
                         "key": p.key,
+                        "fingerprint": p.fingerprint,
                         "p_contra_ab": f[self.contradiction].item(),
                         "p_contra_ba": r[self.contradiction].item(),
                         "p_entail_ab": f[self.entailment].item(),
@@ -59,16 +62,19 @@ def main() -> None:
     parser.add_argument("pairs", help="pair file in data/work, e.g. pair_test or cand_k20")
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--batch-size", type=int, default=32)
-    parser.add_argument("--limit", type=int, help="score only the first N pending pairs (timing runs)")
+    parser.add_argument("--limit", type=int, help="score a seeded random sample of N pending pairs (timing runs)")
     parser.add_argument("--threads", type=int, default=torch.get_num_threads())
     args = parser.parse_args()
 
     torch.set_num_threads(args.threads)
     out = cache_path(args.model, args.pairs)
     out.parent.mkdir(parents=True, exist_ok=True)
-    done = {json.loads(line)["key"] for line in out.open()} if out.exists() else set()
-    pending = [p for p in read_pairs(args.pairs) if p.key not in done][: args.limit]
-    print(f"{len(done)} cached, {len(pending)} to score with {args.model}")
+    done = {(r := json.loads(line))["key"]: r.get("fingerprint") for line in out.open()} if out.exists() else {}
+    pairs = read_pairs(args.pairs)
+    pending = [p for p in pairs if done.get(p.key) != p.fingerprint]
+    if args.limit is not None:
+        pending = random.Random(SAMPLE_SEED).sample(pending, min(args.limit, len(pending)))
+    print(f"{len(pairs) - len(pending)} cached, {len(pending)} to score with {args.model}")
 
     scorer = NLIScorer(args.model, args.batch_size)
     started = time.perf_counter()

@@ -16,7 +16,7 @@ from dataclasses import dataclass
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from cbench.data import Doc, load_docs
+from cbench.data import Doc, fingerprint, load_docs
 from cbench.paths import WORK
 
 DEFAULT_K = 20
@@ -31,6 +31,10 @@ class Pair:
     a: str
     b: str
     label: bool | None = None
+
+    @property
+    def fingerprint(self) -> str:
+        return fingerprint(self.a, self.b)
 
 
 def similarity_matrices(docs: tuple[Doc, ...]) -> dict[str, np.ndarray]:
