@@ -73,9 +73,13 @@ item of an input and lists partial runs separately.
   documents. Thresholds are tuned for F1 on dev only. Always-yes is the floor
   (F1 0.669).
 - **Uncertainty.** AUROC is the headline, with 95% percentile bootstrap
-  intervals (1,000 resamples of test documents). With roughly 40 systems in one
-  table, rank only systems whose intervals don't overlap. AUROC is also reported
-  by length tertile because max-over-pairs grows with document length.
+  intervals (1,000 resamples of test documents). To compare systems, use the
+  "Gap to best" column: a paired bootstrap of the AUROC difference on shared
+  resamples, which is much tighter than comparing per-system intervals because
+  every system scores the same documents. A gap whose interval excludes 0 is a
+  real difference; with roughly 40 systems, expect a few such results by chance.
+  AUROC is also reported by length tertile because max-over-pairs grows with
+  document length.
 - **Option-order bias.** Pair questions are asked twice with reversed options and
   averaged; `order_gap` reports the mean absolute difference (Jev's docs report a
   first-option bias).
@@ -123,7 +127,8 @@ models plus SubQ Snap.
   also supports Vercel, whose catalogue lacks Span-02 and SubQ.
 - **Probe before running.** Some models reportedly have unstated limits (a
   2,000-byte state cap on Clef/Clef Flash, a choice-only Tev1). `sweep probe`
-  sends one real request per model and test into `results/probe.json`, and
+  sends one real request per model and test, using that test's longest input so
+  a size cap fails the probe rather than the full run, into `results/probe.json`;
   `sweep run` only runs what passed.
 - **Perplexity Decider is v1.2** by the user's choice; v1.1 is no longer served
   anywhere (Perplexity's API maps the v1.1 name to v1.2).
@@ -141,7 +146,16 @@ $0.12 (Span-02, Decider Flash) to $1.86 (Clef Omni).
 
 ## Environment
 
-- No GPU on the dev machine; CPU-only torch via the PyTorch CPU index.
+- No GPU on the dev machine; CPU-only torch via the PyTorch CPU index. The CPU
+  is an AMD Ryzen 7 9700X: 8 physical cores, 16 threads. Don't run other heavy
+  work (including `pytest`) during NLI timing; it skews the numbers.
+- First timing results (2026-10-18, contended by a concurrent `pytest`, so
+  pessimistic): DeBERTa-v3-large 0.8 pairs/s (~6.4 h for pair_test + cand_k20),
+  DeBERTa-v3-base 2.5 pairs/s (~2.1 h). Even uncontended, large models are
+  expected around 3 pairs/s, so the 900M–1.5B Microsoft DeBERTa models likely
+  need the hosted option. Re-time contended models with
+  `cbench.nli time --models <id>` after deleting their entry from
+  `results/nli_timing.json`; already-cached pairs are skipped, so it samples new ones.
 - Python 3.12 via uv (system Python is 3.14, too new for some wheels).
 - A stale `VIRTUAL_ENV` from another project may be set in the shell; `unset
   VIRTUAL_ENV` before `uv run` to silence the warning.

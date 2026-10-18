@@ -140,6 +140,39 @@ def auroc_interval(labels: np.ndarray, scores: np.ndarray, level: float = 0.95) 
     return float(np.percentile(values, tail)), float(np.percentile(values, 100 - tail))
 
 
+def add_paired_deltas(results: dict[str, dict], level: float = 0.95) -> None:
+    """AUROC gap to the best system, bootstrapped on shared resamples of the same test items.
+
+    Every system scores the same test documents, so paired resampling is far
+    tighter than comparing per-system intervals. Consumes each result's `_test`.
+    """
+    scored = {name: r for name, r in results.items() if r["auroc_test"] is not None}
+    if not scored:
+        return
+    best = max(scored, key=lambda name: scored[name]["auroc_test"])
+    best_keys, labels, best_scores = scored[best]["_test"]
+    rng = np.random.default_rng(BOOTSTRAP_SEED)
+    resamples = [rng.integers(0, len(labels), len(labels)) for _ in range(BOOTSTRAP_ROUNDS)]
+    tail = (1 - level) / 2 * 100
+    for name, result in scored.items():
+        keys, _, scores = result["_test"]
+        if name == best or keys != best_keys:
+            continue
+        deltas = [
+            a - b
+            for idx in resamples
+            if (a := auroc(labels[idx], best_scores[idx])) is not None
+            and (b := auroc(labels[idx], scores[idx])) is not None
+        ]
+        result["vs_best"] = {
+            "system": best,
+            "delta": scored[best]["auroc_test"] - result["auroc_test"],
+            "ci95": (float(np.percentile(deltas, tail)), float(np.percentile(deltas, 100 - tail))),
+        }
+    for result in results.values():
+        result.pop("_test", None)
+
+
 def evaluate_scores(
     scores: dict[str, float],
     label_of: Callable[[str], bool],
@@ -156,6 +189,7 @@ def evaluate_scores(
     s_test = np.array([scores[k] for k in test])
     threshold = tune_threshold(y_dev, s_dev)
     return {
+        "_test": (tuple(test), y_test, s_test),
         "n_test": len(test),
         "auroc_test": auroc(y_test, s_test),
         "auroc_ci95_test": auroc_interval(y_test, s_test),
@@ -192,6 +226,7 @@ def pair_level(systems: list[System]) -> dict:
             "auroc_by_type_all_splits": by_type,
             "order_gap": system.order_gap.get("pair_test"),
         }
+    add_paired_deltas(results)
     return results
 
 
@@ -250,6 +285,7 @@ def doc_level(systems: list[System], source: str) -> dict:
             "recall_by": recall_breakdown(predicted, docs),
             "localization": localization(sentence_scores, docs, splits),
         }
+    add_paired_deltas(results)
     return results
 
 
@@ -289,8 +325,9 @@ def render(report: dict) -> str:
     lines += [
         f"Test split: {report['n_test_docs']} documents. Thresholds tuned for F1 on the dev split.",
         f"AUROC brackets are 95% bootstrap intervals ({BOOTSTRAP_ROUNDS} resamples of test documents). "
-        "Systems whose intervals overlap should not be ranked against each other; with many systems "
-        "in one table, some will place high by chance.",
+        "To compare two systems use the gap column instead: it resamples the same documents for both, "
+        "so it is much tighter. A gap whose interval excludes 0 is a real difference; with many systems "
+        "in one table, expect a few such results by chance.",
         "",
         "## Candidate pairs",
         "",
@@ -302,23 +339,23 @@ def render(report: dict) -> str:
     for k, r in report["candidate_recall"].items():
         lines.append(f"| {k} | {r['gold_pair_recall']:.1%} of {r['docs_with_gold_pair']} | {r['evidence_sentence_recall']:.1%} of {r['docs_with_evidence']} |")
     lines += ["", "## Pair level (gold pairs vs hardest pair in clean documents)", ""]
-    lines += ["| System | AUROC | F1 | Acc | Order gap | n test |", "|---|---|---|---|---|---|"]
+    lines += ["| System | AUROC | Gap to best | F1 | Acc | Order gap | n test |", "|---|---|---|---|---|---|---|"]
     for name, r in sorted(report["pair_level"].items(), key=lambda x: -(x[1]["auroc_test"] or 0)):
         gap = f"{r['order_gap']:.3f}" if r["order_gap"] is not None else "-"
         lines.append(
-            f"| {name} | {_auroc(r)} | {_f(r['f1_test'])} | {_f(r['accuracy_test'])} | {gap} | {r['n_test']} |"
+            f"| {name} | {_auroc(r)} | {_gap(r)} | {_f(r['f1_test'])} | {_f(r['accuracy_test'])} | {gap} | {r['n_test']} |"
         )
     lines += ["", "## Document level", ""]
     yes = report["always_yes"]
     lines += [
-        "| System | AUROC | F1 | Acc | P | R | Hit@1 | Hit@3 | Docs |",
-        "|---|---|---|---|---|---|---|---|---|",
-        f"| always yes | - | {_f(yes['f1'])} | {_f(yes['accuracy'])} | {_f(yes['precision'])} | {_f(yes['recall'])} | - | - | - |",
+        "| System | AUROC | Gap to best | F1 | Acc | P | R | Hit@1 | Hit@3 | Docs |",
+        "|---|---|---|---|---|---|---|---|---|---|",
+        f"| always yes | - | - | {_f(yes['f1'])} | {_f(yes['accuracy'])} | {_f(yes['precision'])} | {_f(yes['recall'])} | - | - | - |",
     ]
     for name, r in sorted(report["doc_level"].items(), key=lambda x: -(x[1]["auroc_test"] or 0)):
         loc = r["localization"]
         lines.append(
-            f"| {name} | {_auroc(r)} | {_f(r['f1_test'])} | {_f(r['accuracy_test'])} | {_f(r['precision_test'])} "
+            f"| {name} | {_auroc(r)} | {_gap(r)} | {_f(r['f1_test'])} | {_f(r['accuracy_test'])} | {_f(r['precision_test'])} "
             f"| {_f(r['recall_test'])} | {_f(loc['hit@1'])} | {_f(loc['hit@3'])} | {r['n_docs_scored']} |"
         )
     lines += ["", "### Recall by contradiction type (test positives; multi-label)", ""]
@@ -348,6 +385,13 @@ def render(report: dict) -> str:
 
 def _f(value: float | None) -> str:
     return "-" if value is None else f"{value:.3f}"
+
+
+def _gap(result: dict) -> str:
+    if not (vs := result.get("vs_best")):
+        return "best" if result.get("auroc_test") is not None else "-"
+    lo, hi = vs["ci95"]
+    return f"{vs['delta']:.3f} [{lo:.3f}, {hi:.3f}]"
 
 
 def _auroc(result: dict) -> str:

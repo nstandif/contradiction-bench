@@ -249,11 +249,12 @@ async def score_model(
     source: str,
     *,
     limit: int | None = None,
+    only_keys: set[str] | None = None,
     concurrency: int = 8,
     log=print,
 ) -> RunSummary:
     gateway = GATEWAYS[gateway_name]
-    items = work_items(mode, source)
+    items = [it for it in work_items(mode, source) if only_keys is None or _key(it) in only_keys]
     out = cache_path(model, mode, source if mode == "pairs" else "all")
     done = cached_fingerprints(out)
     pending = [it for it in items if done.get(_key(it)) != it.fingerprint]

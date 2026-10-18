@@ -84,12 +84,24 @@ def selected(catalog: dict, only: list[str] | None) -> list[dict]:
     return models
 
 
+def largest_item_key(test: str) -> str:
+    """The longest input of a test, so a model with a size cap fails its probe, not the full run."""
+    mode, source = mode_source(test)
+    items = work_items(mode, source)
+    if mode == "pairs":
+        return max(items, key=lambda p: len(p.a) + len(p.b)).key
+    return max(items, key=lambda d: sum(len(s) for s in d.sentences)).id
+
+
 async def probe(models: list[dict], tests: list[str]) -> dict:
     results = json.loads(PROBE.read_text()) if PROBE.exists() else {}
+    probe_keys = {test: {largest_item_key(test)} for test in tests}
 
     async def one(m: dict, test: str) -> None:
         mode, source = mode_source(test)
-        summary = await score_model(m["route"], m["id"], mode, source, limit=1, concurrency=1, log=lambda _: None)
+        summary = await score_model(
+            m["route"], m["id"], mode, source, only_keys=probe_keys[test], concurrency=1, log=lambda _: None
+        )
         ok = summary.failed == 0
         results.setdefault(m["id"], {})[test] = {"ok": ok, "error": summary.first_error}
         print(f"{'ok  ' if ok else 'FAIL'} {m['id']} {test} {summary.first_error or ''}"[:300], flush=True)

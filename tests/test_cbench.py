@@ -72,6 +72,17 @@ def test_nli_label_index_handles_case_and_vitaminc_names():
         label_index({0: "entailment", 1: "not_entailment"}, "contradiction")
 
 
+@needs_data
+def test_probe_uses_the_longest_input():
+    from cbench.sweep import largest_item_key
+
+    docs = load_docs()
+    longest = max(docs, key=lambda d: sum(len(s) for s in d.sentences))
+    assert largest_item_key("native") == longest.id
+    pairs = read_pairs("pair_test")
+    assert largest_item_key("pair_test") == max(pairs, key=lambda p: len(p.a) + len(p.b)).key
+
+
 def test_chunked_respects_question_limit():
     chunks = chunked({f"q{i}": {} for i in range(37)}, 16)
     assert [len(c) for c in chunks] == [16, 16, 5]
@@ -127,6 +138,10 @@ def test_evaluator_end_to_end_on_fabricated_caches(tmp_path, monkeypatch):
     assert abs(random_result["auroc_test"] - 0.5) < 0.1
     low, high = random_result["auroc_ci95_test"]
     assert low < random_result["auroc_test"] < high and 0.05 < high - low < 0.2
+    gap = random_result["vs_best"]
+    assert gap["system"] == "nli:perfect" and gap["ci95"][0] > 0.3
+    assert "vs_best" not in report["pair_level"]["nli:perfect"]
+    assert "_test" not in random_result
     assert "nli:partial" not in report["pair_level"]
     assert ("nli:partial", "pair_test", f"10/{len(pair_test)}") in report["incomplete"]
 
