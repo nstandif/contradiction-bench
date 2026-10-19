@@ -7,26 +7,28 @@ models detect self-contradictions in real documents?
 
 ## Start here (handoff)
 
-State as of 2026-10-18: **everything is built and tested; no real scores exist
-yet.** In order, the next agent should:
+State as of 2026-10-18: **first full sweep done**; `results/report.md` and
+`metrics.json` are committed and the Streamlit app reads them.
 
-1. **Set up the checkout** (data and venv are gitignored):
-   `uv sync && uv run python -m cbench.fetch && uv run python -m cbench.candidates --k 20 && uv run pytest`.
-2. **NLI timing.** `uv run python -m cbench.nli time` measures CPU throughput per
-   model and writes `results/nli_timing.json` with projected hours for the full
-   sweep. A first run was started on 2026-10-18; if that file exists, reuse it.
-   Timing pairs are cached, so they count toward the full run.
-3. **Decide where each NLI model runs.** Models whose projected time is
-   acceptable run locally with `cbench.nli sweep`. For the rest, see
-   "Hosted NLI" below; the user asked for a hosted option for any model too slow
-   on CPU, and hasn't picked one yet.
-4. **Decision models need keys** in `.env` at the project root:
-   `OPENROUTER_API_KEY` and `SUBQ_API_KEY`. The user has not supplied them yet.
-   Then: `cbench.sweep probe`, show the user which models pass, then
-   `cbench.sweep run` (about $6 for the default tests; see "Cost").
-5. **Report.** `cbench.evaluate` writes `results/report.md` and `metrics.json`.
-   Commit the report, `results/catalog.json`, `results/probe.json` and
-   `results/nli_timing.json`; caches stay out of git.
+- **Decision models:** 20 of 21 complete on `pair_test` and `native`.
+  ScaleDown Classify-1 failed its probe (it only accepts a state with `text` or
+  `document`, so it can't take the shared request body) and is not run. GPT-6 Luna
+  is missing one native document: OpenAI refuses question `s51` on it, so its
+  native run stays partial and unreported.
+- **NLI:** 12 of 19 complete on `pair_test` and `cand_k20`. The other seven are
+  too slow on this CPU (`results/nli_timing.json`): the three MoritzLaurer models
+  (3–9 h each; 3–4× slower than the same-size cross-encoder models for a reason
+  not yet found), VitaminC ALBERT-xlarge (6 h) and Microsoft deberta-xlarge,
+  v2-xlarge and v2-xxlarge (4, 17, 33 h). Running them needs "Hosted NLI" below,
+  which the user hasn't chosen yet.
+- **Not run:** `cand_k20` for decision models (about $6 more).
+
+To re-run anything: set up the checkout (`uv sync --all-groups &&
+uv run python -m cbench.fetch && uv run python -m cbench.candidates --k 20`),
+put `OPENROUTER_API_KEY` and `SUBQ_API_KEY` in `.env`, then rerun the scorers;
+they resume from `results/cache/`. Rebuild with `cbench.evaluate` and commit
+`report.md`, `metrics.json`, `probe.json` and `nli_timing.json`; caches stay out
+of git.
 
 Ask the user before anything that costs money or takes hours of compute. They
 have so far approved: the NLI sweep (all 19 models), the decision-model sweep

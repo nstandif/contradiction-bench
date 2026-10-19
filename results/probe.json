@@ -1,0 +1,212 @@
+{
+  "cloudflare/clef": {
+    "native": {
+      "error": null,
+      "ok": true
+    },
+    "pair_test": {
+      "error": null,
+      "ok": true
+    }
+  },
+  "cloudflare/clef-flash": {
+    "native": {
+      "error": null,
+      "ok": true
+    },
+    "pair_test": {
+      "error": null,
+      "ok": true
+    }
+  },
+  "cloudflare/clef-omni": {
+    "native": {
+      "error": null,
+      "ok": true
+    },
+    "pair_test": {
+      "error": null,
+      "ok": true
+    }
+  },
+  "inception/mercury-decide": {
+    "native": {
+      "error": null,
+      "ok": true
+    },
+    "pair_test": {
+      "error": null,
+      "ok": true
+    }
+  },
+  "jaredpalmer/kev-4b": {
+    "native": {
+      "error": null,
+      "ok": true
+    },
+    "pair_test": {
+      "error": null,
+      "ok": true
+    }
+  },
+  "liquid/d1": {
+    "native": {
+      "error": null,
+      "ok": true
+    },
+    "pair_test": {
+      "error": null,
+      "ok": true
+    }
+  },
+  "liquid/d1-ultra": {
+    "native": {
+      "error": null,
+      "ok": true
+    },
+    "pair_test": {
+      "error": null,
+      "ok": true
+    }
+  },
+  "microsoft/microsoft-decision-1": {
+    "native": {
+      "error": null,
+      "ok": true
+    },
+    "pair_test": {
+      "error": null,
+      "ok": true
+    }
+  },
+  "nace-ai/drex-v1.5": {
+    "native": {
+      "error": null,
+      "ok": true
+    },
+    "pair_test": {
+      "error": null,
+      "ok": true
+    }
+  },
+  "nace-ai/drex-v2.0": {
+    "native": {
+      "error": null,
+      "ok": true
+    },
+    "pair_test": {
+      "error": null,
+      "ok": true
+    }
+  },
+  "openai/gpt-6-luna-decisions": {
+    "native": {
+      "error": null,
+      "ok": true
+    },
+    "pair_test": {
+      "error": null,
+      "ok": true
+    }
+  },
+  "perplexity/pplx-decider-flash-v1.2": {
+    "native": {
+      "error": null,
+      "ok": true
+    },
+    "pair_test": {
+      "error": null,
+      "ok": true
+    }
+  },
+  "perplexity/pplx-decider-v1.2": {
+    "native": {
+      "error": null,
+      "ok": true
+    },
+    "pair_test": {
+      "error": null,
+      "ok": true
+    }
+  },
+  "respan/span-02": {
+    "native": {
+      "error": null,
+      "ok": true
+    },
+    "pair_test": {
+      "error": null,
+      "ok": true
+    }
+  },
+  "scaledown/classify-1": {
+    "native": {
+      "error": "RuntimeError('400 from https://openrouter.ai/api/alpha/decisions: {\"error\":{\"message\":\"ScaleDown state must be a string or an object with only text, document, and document_mime_type, including text or document\",\"code\":400}}')",
+      "ok": false
+    },
+    "pair_test": {
+      "error": "RuntimeError('400 from https://openrouter.ai/api/alpha/decisions: {\"error\":{\"message\":\"ScaleDown state must be a string or an object with only text, document, and document_mime_type, including text or document\",\"code\":400}}')",
+      "ok": false
+    }
+  },
+  "subq-snap-preview": {
+    "native": {
+      "error": null,
+      "ok": true
+    },
+    "pair_test": {
+      "error": null,
+      "ok": true
+    }
+  },
+  "togethercomputer/tev1-4b-experimental": {
+    "native": {
+      "error": null,
+      "ok": true
+    },
+    "pair_test": {
+      "error": null,
+      "ok": true
+    }
+  },
+  "typesafe/jev-1.13": {
+    "native": {
+      "error": null,
+      "ok": true
+    },
+    "pair_test": {
+      "error": null,
+      "ok": true
+    }
+  },
+  "typesafe/jev-1.14": {
+    "native": {
+      "error": null,
+      "ok": true
+    },
+    "pair_test": {
+      "error": null,
+      "ok": true
+    }
+  },
+  "upstage/solar-decide": {
+    "native": {
+      "error": null,
+      "ok": true
+    },
+    "pair_test": {
+      "error": null,
+      "ok": true
+    }
+  },
+  "upstage/solar-decide-flash": {
+    "native": {
+      "error": null,
+      "ok": true
+    },
+    "pair_test": {
+      "error": null,
+      "ok": true
+    }
+  }
+}

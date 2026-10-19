@@ -1,0 +1,155 @@
+{
+  "cross-encoder/nli-deberta-v3-large": {
+    "pairs_per_second": 2.44,
+    "sample": 64,
+    "threads": 8,
+    "projected_hours": {
+      "pair_test": 0.09,
+      "cand_k20": 2.03
+    }
+  },
+  "cross-encoder/nli-deberta-v3-base": {
+    "pairs_per_second": 7.55,
+    "sample": 64,
+    "threads": 8,
+    "projected_hours": {
+      "pair_test": 0.03,
+      "cand_k20": 0.66
+    }
+  },
+  "cross-encoder/nli-deberta-v3-small": {
+    "pairs_per_second": 15.36,
+    "sample": 64,
+    "threads": 8,
+    "projected_hours": {
+      "pair_test": 0.01,
+      "cand_k20": 0.32
+    }
+  },
+  "cross-encoder/nli-roberta-base": {
+    "pairs_per_second": 13.06,
+    "sample": 64,
+    "threads": 8,
+    "projected_hours": {
+      "pair_test": 0.02,
+      "cand_k20": 0.38
+    }
+  },
+  "FacebookAI/roberta-large-mnli": {
+    "pairs_per_second": 3.89,
+    "sample": 64,
+    "threads": 8,
+    "projected_hours": {
+      "pair_test": 0.05,
+      "cand_k20": 1.27
+    }
+  },
+  "facebook/bart-large-mnli": {
+    "pairs_per_second": 3.45,
+    "sample": 64,
+    "threads": 8,
+    "projected_hours": {
+      "pair_test": 0.06,
+      "cand_k20": 1.43
+    }
+  },
+  "microsoft/deberta-large-mnli": {
+    "pairs_per_second": 2.6,
+    "sample": 64,
+    "threads": 8,
+    "projected_hours": {
+      "pair_test": 0.08,
+      "cand_k20": 1.9
+    }
+  },
+  "microsoft/deberta-xlarge-mnli": {
+    "pairs_per_second": 1.18,
+    "sample": 64,
+    "threads": 8,
+    "projected_hours": {
+      "pair_test": 0.18,
+      "cand_k20": 4.21
+    }
+  },
+  "microsoft/deberta-v2-xlarge-mnli": {
+    "pairs_per_second": 0.31,
+    "sample": 64,
+    "threads": 8,
+    "projected_hours": {
+      "pair_test": 0.68,
+      "cand_k20": 15.98
+    }
+  },
+  "microsoft/deberta-v2-xxlarge-mnli": {
+    "pairs_per_second": 0.16,
+    "sample": 64,
+    "threads": 8,
+    "projected_hours": {
+      "pair_test": 1.35,
+      "cand_k20": 31.45
+    }
+  },
+  "ynie/roberta-large-snli_mnli_fever_anli_R1_R2_R3-nli": {
+    "pairs_per_second": 3.88,
+    "sample": 64,
+    "threads": 8,
+    "projected_hours": {
+      "pair_test": 0.05,
+      "cand_k20": 1.27
+    }
+  },
+  "tals/albert-xlarge-vitaminc-mnli": {
+    "pairs_per_second": 0.83,
+    "sample": 64,
+    "threads": 8,
+    "projected_hours": {
+      "pair_test": 0.26,
+      "cand_k20": 6.0
+    }
+  },
+  "sileod/deberta-v3-large-tasksource-nli": {
+    "pairs_per_second": 2.43,
+    "sample": 64,
+    "threads": 8,
+    "projected_hours": {
+      "pair_test": 0.09,
+      "cand_k20": 2.04
+    }
+  },
+  "tasksource/deberta-base-long-nli": {
+    "pairs_per_second": 7.21,
+    "sample": 64,
+    "threads": 8,
+    "projected_hours": {
+      "pair_test": 0.03,
+      "cand_k20": 0.69
+    }
+  },
+  "MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli": {
+    "pairs_per_second": 0.59,
+    "sample": 64,
+    "threads": 8,
+    "projected_hours": {
+      "pair_test": 0.36,
+      "cand_k20": 8.36
+    }
+  },
+  "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli": {
+    "pairs_per_second": 1.85,
+    "sample": 64,
+    "threads": 8,
+    "projected_hours": {
+      "pair_test": 0.11,
+      "cand_k20": 2.68
+    }
+  },
+  "MoritzLaurer/mDeBERTa-v3-base-xnli-multilingual-nli-2mil7": {
+    "pairs_per_second": 1.29,
+    "sample": 64,
+    "threads": 8,
+    "projected_hours": {
+      "pair_test": 0.16,
+      "cand_k20": 3.82
+    }
+  }
+}
