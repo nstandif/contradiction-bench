@@ -39,6 +39,10 @@ def metrics_file(tmp_path, monkeypatch):
             "typesafe/jev-1.14 [native:document]": doc_result(0.86),
             "nli:nli-deberta-v3-xsmall [cand_k20]": doc_result(0.75, 0.11),
         },
+        "explain": {
+            "typesafe/jev-1.14 [explain]": {"n": 259, "pair@1": 0.6, "pair@1_ci95": [0.55, 0.65], "pair@2": 0.7,
+                                            "pipeline": {"finders": ["typesafe/jev-1.14"], "measured_cost": 0.25}},
+        },
         "always_yes": {"f1": 0.669, "accuracy": 0.5, "precision": 0.5, "recall": 1.0},
         "incomplete": [["nli:roberta-large-mnli", "cand_k20", "100/17815"]],
     }))
@@ -51,6 +55,7 @@ def test_leaderboard_renders_without_errors(metrics_file):
     assert not app.exception
     assert app.title[0].value == "Leaderboard"
     assert [m.value for m in app.metric][:1] == ["0.860"]
+    assert "Naming the pair" in [h.value for h in app.subheader]
 
 
 @pytest.mark.parametrize("test", ["Documents", "Pairs"])

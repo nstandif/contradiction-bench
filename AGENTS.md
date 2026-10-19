@@ -22,11 +22,12 @@ State as of 2026-10-18: **first full sweep done**; `results/report.md` and
   v2-xlarge and v2-xxlarge (4, 17, 33 h). Running them needs "Hosted NLI" below,
   which the user hasn't chosen yet.
 - **Not run:** `cand_k20` for decision models (about $6 more).
-- **Find → verify** (`results/verify.md`): a shortlist from native sentence scores plus a
-  whole-document "which sentence does this contradict?" pass by the Decider. It doesn't beat D1
-  Ultra native on detection (0.841 vs 0.854) but names the gold pair 54% of the time. The code is
-  on the unmerged branch `feat/verify`, and its scores are cached in
-  `results/cache/decide/perplexity__pplx-decider-v1.2/verify_all.jsonl`.
+- **Find → verify / explain** (`cbench.verify`, `results/verify.md`): native sentence scores
+  shortlist suspicious sentences, then a verifier reads the whole document and answers "which
+  sentence does this contradict?". Verify (detection) doesn't beat D1 Ultra native: 0.841 vs
+  0.854. Explain (finders pick the sentence, verifiers name the partner) gets the exact gold pair
+  in 61.8% of documents. Verifiers run so far: Decider v1.2 and D1 Ultra, cached as
+  `verify_all.jsonl` under each model's cache directory.
 
 To re-run anything: set up the checkout (`uv sync --all-groups &&
 uv run python -m cbench.fetch && uv run python -m cbench.candidates --k 20`),
@@ -56,7 +57,8 @@ far better than it is.
 | `cbench.nli` | 3-way NLI scoring: `run`, `time`, `sweep` |
 | `cbench.decide` | decision-model client for OpenRouter, Vercel AI Gateway, SubQ |
 | `cbench.sweep` | decision-model sweep: `catalog`, `estimate`, `probe`, `run` |
-| `cbench.evaluate` | report with bootstrap CIs, per-type/scope/length breakdowns |
+| `cbench.verify` | find → verify (detection) and find → explain (naming the pair) over native runs |
+| `cbench.evaluate` | report with bootstrap CIs, per-type/scope/length breakdowns, pair naming |
 | `cbench.dashboard` + `app/` | Streamlit explorer over `results/metrics.json`: cost-vs-AUROC leaderboard, compare page |
 
 Run the explorer with `uv sync --group app && uv run streamlit run app/streamlit_app.py`;
@@ -99,6 +101,9 @@ item of an input and lists partial runs separately.
   first-option bias).
 - **NLI** scores both directions and takes the max contradiction probability.
 - `contra_type` is multi-label, so per-type recall counts a document once per type.
+- **Naming the pair** (`explain` in `metrics.json`): Pair@1/Pair@2 over contradictory test
+  documents that have a labelled partner (`ref_idx`, 259 documents). Pairwise systems compete
+  with their top candidate pairs, so candidate recall caps them.
 
 ## NLI models
 

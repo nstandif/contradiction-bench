@@ -3,8 +3,9 @@ import plotly.graph_objects as go
 import streamlit as st
 from plotly.subplots import make_subplots
 
-from cbench.dashboard import frontier
-from common import FAMILY_COLORS, FAMILY_NAMES, FRONTIER_COLOR, LAYOUT, fmt, gap_text, hover, no_rows, selection
+from cbench.dashboard import explain_rows, frontier
+from common import (FAMILY_COLORS, FAMILY_NAMES, FRONTIER_COLOR, LAYOUT, fmt, gap_text, hover, load_prices,
+                    load_tokens, no_rows, selection)
 
 COST_TICKS = [0.01, 0.02, 0.05, 0.1, 0.25, 0.5, 1, 2, 5, 10]
 
@@ -104,6 +105,47 @@ def leaderboard_table(rows: list[dict]) -> None:
     })
 
 
+def explain_chart(rows: list[dict]) -> go.Figure:
+    ordered = rows[::-1]
+    labels = [r["label"] for r in ordered]
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=[r["pair2"] for r in ordered], y=labels, mode="markers", name="Pair@2",
+        marker=dict(symbol="circle-open", size=10, color=[FAMILY_COLORS[r["family"]] for r in ordered]),
+        hovertemplate="%{y}<br>Pair@2 %{x:.3f}<extra></extra>"))
+    fig.add_trace(go.Scatter(
+        x=[r["pair1"] for r in ordered], y=labels, mode="markers", name="Pair@1",
+        marker=dict(size=10, color=[FAMILY_COLORS[r["family"]] for r in ordered]),
+        error_x=dict(type="data", symmetric=False, thickness=1.5, width=0, color="#94a3b8",
+                     array=[r["ci_hi"] - r["pair1"] for r in ordered],
+                     arrayminus=[r["pair1"] - r["ci_lo"] for r in ordered]),
+        hovertemplate="%{y}<br>Pair@1 %{x:.3f}<extra></extra>"))
+    fig.update_xaxes(title_text="Share of contradictory test documents whose gold pair is named", range=[0, 1])
+    fig.update_layout(**LAYOUT, height=max(260, 26 * len(rows) + 80), legend=dict(orientation="h", y=1.08, x=0))
+    return fig
+
+
+def explain_section() -> None:
+    families = st.session_state.get("families", list(FAMILY_NAMES))
+    explained = [r for r in explain_rows(metrics, load_prices(), load_tokens()) if r["family"] in families]
+    if not explained:
+        return
+    st.subheader("Naming the pair")
+    st.caption(f"{explained[0]['n']} contradictory test documents with a labelled partner sentence. "
+               "Find → explain takes the sentence the finders rate highest and the partner the verifiers name for "
+               "it; pairwise systems use their top candidate pairs, so candidate recall caps them. "
+               "Native runs score sentences only, so they can't name a pair.")
+    st.plotly_chart(explain_chart(explained), width="stretch")
+    st.dataframe(pd.DataFrame([{
+        "System": r["label"], "Family": FAMILY_NAMES[r["family"]], "Pair@1": r["pair1"],
+        "95% CI": f"[{fmt(r['ci_lo'])}, {fmt(r['ci_hi'])}]", "Pair@2": r["pair2"], "Cost": r["cost"],
+    } for r in explained]), hide_index=True, width="stretch", column_config={
+        "Pair@1": st.column_config.NumberColumn(format="%.3f"),
+        "Pair@2": st.column_config.NumberColumn(format="%.3f"),
+        "Cost": st.column_config.NumberColumn("Cost (est.)", format="$%.3f"),
+    })
+
+
 def card(col, label: str, value, note: str) -> None:
     col.metric(label, value, note, delta_color="off", delta_arrow="off", border=True)
 
@@ -141,6 +183,8 @@ def leaderboard() -> None:
     leaderboard_table(rows)
     st.caption(f"Gap to best is a paired bootstrap of the AUROC difference to **{overall_best['label']}**, the best "
                "system overall. Red means its interval excludes 0. With many systems, expect a few by chance.")
+    if level == "doc_level":
+        explain_section()
     if partial := metrics.get("incomplete"):
         with st.expander(f"{len(partial)} partial runs not reported"):
             st.dataframe(pd.DataFrame(partial, columns=["System", "Input", "Scored"]), hide_index=True)

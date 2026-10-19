@@ -4651,6 +4651,117 @@
         ]
       }
     },
+    "liquid/d1-ultra [native:verify]": {
+      "n_test": 624,
+      "auroc_test": 0.8240805424286006,
+      "auroc_ci95_test": [
+        0.7904885375083053,
+        0.8558866526279961
+      ],
+      "threshold": 0.781294792474978,
+      "f1_test": 0.7390029325513197,
+      "accuracy_test": 0.7147435897435898,
+      "precision_test": 0.6847826086956522,
+      "recall_test": 0.802547770700637,
+      "n_docs_scored": 891,
+      "auroc_by_length_tertile": {
+        "short": 0.7881482868376708,
+        "medium": 0.8084461507375227,
+        "long": 0.8752216124947235
+      },
+      "recall_by": {
+        "contra_type": {
+          "Causal": {
+            "n": 29,
+            "recall": 0.6896551724137931
+          },
+          "Content": {
+            "n": 205,
+            "recall": 0.8097560975609757
+          },
+          "Emotion/Mood/Feeling": {
+            "n": 61,
+            "recall": 0.7213114754098361
+          },
+          "Factual": {
+            "n": 42,
+            "recall": 0.8095238095238095
+          },
+          "Negation": {
+            "n": 60,
+            "recall": 0.9
+          },
+          "Numeric": {
+            "n": 49,
+            "recall": 0.9183673469387755
+          },
+          "Other": {
+            "n": 1,
+            "recall": 1.0
+          },
+          "Perspective/View/Opinion": {
+            "n": 66,
+            "recall": 0.7272727272727273
+          },
+          "Relation": {
+            "n": 17,
+            "recall": 0.7647058823529411
+          }
+        },
+        "scope": {
+          "global": {
+            "n": 105,
+            "recall": 0.9142857142857143
+          },
+          "global+intra": {
+            "n": 1,
+            "recall": 1.0
+          },
+          "intra": {
+            "n": 54,
+            "recall": 0.6296296296296297
+          },
+          "local": {
+            "n": 154,
+            "recall": 0.7857142857142857
+          }
+        },
+        "doc_type": {
+          "news": {
+            "n": 109,
+            "recall": 0.7431192660550459
+          },
+          "story": {
+            "n": 94,
+            "recall": 0.6914893617021277
+          },
+          "wiki": {
+            "n": 111,
+            "recall": 0.954954954954955
+          }
+        }
+      },
+      "localization": {
+        "n": 314,
+        "hit@1": 0.40764331210191085,
+        "hit@3": 0.8375796178343949
+      },
+      "pipeline": {
+        "finders": [
+          "liquid/d1-ultra",
+          "perplexity/pplx-decider-v1.2"
+        ],
+        "measured_cost": 0.26408991
+      },
+      "vs_best": {
+        "system": "liquid/d1-ultra [native:document]",
+        "delta": 0.029556194781179546,
+        "ci95": [
+          0.006431382825666891,
+          0.05245289677845401
+        ]
+      }
+    },
     "microsoft/microsoft-decision-1 [native:document]": {
       "n_test": 624,
       "auroc_test": 0.7335114033285391,
@@ -5688,6 +5799,117 @@
         "ci95": [
           -0.01989844667709055,
           0.027052960787898202
+        ]
+      }
+    },
+    "perplexity/pplx-decider-v1.2 [native:verify]": {
+      "n_test": 624,
+      "auroc_test": 0.8407540579412369,
+      "auroc_ci95_test": [
+        0.8092232249421651,
+        0.8711710059695221
+      ],
+      "threshold": 0.8020838441867969,
+      "f1_test": 0.7566718995290423,
+      "accuracy_test": 0.7516025641025641,
+      "precision_test": 0.7461300309597523,
+      "recall_test": 0.767515923566879,
+      "n_docs_scored": 891,
+      "auroc_by_length_tertile": {
+        "short": 0.8559258565811647,
+        "medium": 0.8508789654475651,
+        "long": 0.8354579991557619
+      },
+      "recall_by": {
+        "contra_type": {
+          "Causal": {
+            "n": 29,
+            "recall": 0.6551724137931034
+          },
+          "Content": {
+            "n": 205,
+            "recall": 0.775609756097561
+          },
+          "Emotion/Mood/Feeling": {
+            "n": 61,
+            "recall": 0.7868852459016393
+          },
+          "Factual": {
+            "n": 42,
+            "recall": 0.7380952380952381
+          },
+          "Negation": {
+            "n": 60,
+            "recall": 0.85
+          },
+          "Numeric": {
+            "n": 49,
+            "recall": 0.7959183673469388
+          },
+          "Other": {
+            "n": 1,
+            "recall": 1.0
+          },
+          "Perspective/View/Opinion": {
+            "n": 66,
+            "recall": 0.7121212121212122
+          },
+          "Relation": {
+            "n": 17,
+            "recall": 0.8823529411764706
+          }
+        },
+        "scope": {
+          "global": {
+            "n": 105,
+            "recall": 0.9047619047619048
+          },
+          "global+intra": {
+            "n": 1,
+            "recall": 1.0
+          },
+          "intra": {
+            "n": 54,
+            "recall": 0.5925925925925926
+          },
+          "local": {
+            "n": 154,
+            "recall": 0.7337662337662337
+          }
+        },
+        "doc_type": {
+          "news": {
+            "n": 109,
+            "recall": 0.6513761467889908
+          },
+          "story": {
+            "n": 94,
+            "recall": 0.7446808510638298
+          },
+          "wiki": {
+            "n": 111,
+            "recall": 0.9009009009009009
+          }
+        }
+      },
+      "localization": {
+        "n": 314,
+        "hit@1": 0.42356687898089174,
+        "hit@3": 0.8121019108280255
+      },
+      "pipeline": {
+        "finders": [
+          "liquid/d1-ultra",
+          "perplexity/pplx-decider-v1.2"
+        ],
+        "measured_cost": 0.17565014
+      },
+      "vs_best": {
+        "system": "liquid/d1-ultra [native:document]",
+        "delta": 0.012882679268543251,
+        "ci95": [
+          -0.009490985757295371,
+          0.03612621222516991
         ]
       }
     },
@@ -7146,6 +7368,164 @@
           0.3828818461042446
         ]
       }
+    }
+  },
+  "explain": {
+    "liquid/d1-ultra [explain]": {
+      "n": 259,
+      "pair@1": 0.6138996138996139,
+      "pair@1_ci95": [
+        0.555984555984556,
+        0.6756756756756757
+      ],
+      "pair@2": 0.694980694980695,
+      "pipeline": {
+        "finders": [
+          "liquid/d1-ultra",
+          "perplexity/pplx-decider-v1.2"
+        ],
+        "measured_cost": 0.26408991
+      }
+    },
+    "perplexity/pplx-decider-v1.2 [explain]": {
+      "n": 259,
+      "pair@1": 0.5907335907335908,
+      "pair@1_ci95": [
+        0.5366795366795367,
+        0.6525096525096525
+      ],
+      "pair@2": 0.6795366795366795,
+      "pipeline": {
+        "finders": [
+          "liquid/d1-ultra",
+          "perplexity/pplx-decider-v1.2"
+        ],
+        "measured_cost": 0.17565014
+      }
+    },
+    "liquid/d1-ultra + perplexity/pplx-decider-v1.2 [explain]": {
+      "n": 259,
+      "pair@1": 0.6177606177606177,
+      "pair@1_ci95": [
+        0.5598455598455598,
+        0.6795366795366795
+      ],
+      "pair@2": 0.6988416988416989,
+      "pipeline": {
+        "finders": [
+          "liquid/d1-ultra",
+          "perplexity/pplx-decider-v1.2"
+        ],
+        "measured_cost": 0.43974005
+      }
+    },
+    "nli:roberta-large-mnli [cand_k20]": {
+      "n": 259,
+      "pair@1": 0.3474903474903475,
+      "pair@1_ci95": [
+        0.28957528957528955,
+        0.40540540540540543
+      ],
+      "pair@2": 0.416988416988417
+    },
+    "nli:nli-deberta-v3-base [cand_k20]": {
+      "n": 259,
+      "pair@1": 0.2625482625482625,
+      "pair@1_ci95": [
+        0.21235521235521235,
+        0.31283783783783775
+      ],
+      "pair@2": 0.3590733590733591
+    },
+    "nli:nli-deberta-v3-large [cand_k20]": {
+      "n": 259,
+      "pair@1": 0.28185328185328185,
+      "pair@1_ci95": [
+        0.2277992277992278,
+        0.33976833976833976
+      ],
+      "pair@2": 0.3474903474903475
+    },
+    "nli:nli-deberta-v3-small [cand_k20]": {
+      "n": 259,
+      "pair@1": 0.2972972972972973,
+      "pair@1_ci95": [
+        0.24324324324324326,
+        0.35135135135135137
+      ],
+      "pair@2": 0.3474903474903475
+    },
+    "nli:nli-deberta-v3-xsmall [cand_k20]": {
+      "n": 259,
+      "pair@1": 0.305019305019305,
+      "pair@1_ci95": [
+        0.25096525096525096,
+        0.36303088803088795
+      ],
+      "pair@2": 0.36293436293436293
+    },
+    "nli:nli-distilroberta-base [cand_k20]": {
+      "n": 259,
+      "pair@1": 0.29343629343629346,
+      "pair@1_ci95": [
+        0.23928571428571438,
+        0.34758687258687254
+      ],
+      "pair@2": 0.3474903474903475
+    },
+    "nli:nli-roberta-base [cand_k20]": {
+      "n": 259,
+      "pair@1": 0.32432432432432434,
+      "pair@1_ci95": [
+        0.2702702702702703,
+        0.38223938223938225
+      ],
+      "pair@2": 0.36293436293436293
+    },
+    "nli:bart-large-mnli [cand_k20]": {
+      "n": 259,
+      "pair@1": 0.3088803088803089,
+      "pair@1_ci95": [
+        0.2548262548262548,
+        0.36293436293436293
+      ],
+      "pair@2": 0.39768339768339767
+    },
+    "nli:deberta-large-mnli [cand_k20]": {
+      "n": 259,
+      "pair@1": 0.3436293436293436,
+      "pair@1_ci95": [
+        0.28957528957528955,
+        0.4015444015444015
+      ],
+      "pair@2": 0.4015444015444015
+    },
+    "nli:deberta-v3-large-tasksource-nli [cand_k20]": {
+      "n": 259,
+      "pair@1": 0.3590733590733591,
+      "pair@1_ci95": [
+        0.30115830115830117,
+        0.42084942084942084
+      ],
+      "pair@2": 0.41312741312741313
+    },
+    "nli:deberta-base-long-nli [cand_k20]": {
+      "n": 259,
+      "pair@1": 0.37065637065637064,
+      "pair@1_ci95": [
+        0.31650579150579156,
+        0.42857142857142855
+      ],
+      "pair@2": 0.41312741312741313
+    },
+    "nli:roberta-large-snli_mnli_fever_anli_R1_R2_R3-nli [cand_k20]": {
+      "n": 259,
+      "pair@1": 0.3436293436293436,
+      "pair@1_ci95": [
+        0.28957528957528955,
+        0.4015444015444015
+      ],
+      "pair@2": 0.40540540540540543
     }
   },
   "always_yes": {

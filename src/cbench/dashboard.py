@@ -2,12 +2,18 @@
 
 Costs are estimates: catalogue price per token times `sweep estimate` tokens for
 the run a configuration came from. NLI models run locally and cost nothing.
+A find → verify pipeline costs its measured verifier spend plus its finders' native runs.
 """
 
 import re
 
 CONFIG = re.compile(r"^(?P<system>.+) \[(?P<config>[^\]]+)\]$")
-CONFIG_LABELS = {"native:document": "native", "native:max-sentence": "native max-sentence"}
+CONFIG_LABELS = {
+    "native:document": "native",
+    "native:max-sentence": "native max-sentence",
+    "native:verify": "find → verify",
+    "explain": "find → explain",
+}
 
 
 def parse_name(name: str) -> tuple[str, str | None]:
@@ -27,7 +33,7 @@ def family(system: str) -> str:
 
 
 def label(system: str, config: str | None) -> str:
-    short = system.removeprefix("nli:").rsplit("/", 1)[-1]
+    short = " + ".join(part.removeprefix("nli:").rsplit("/", 1)[-1] for part in system.split(" + "))
     return f"{short} · {CONFIG_LABELS.get(config, config)}" if config else short
 
 
@@ -37,6 +43,11 @@ def cost(system: str, config: str | None, prices: dict[str, float], tokens: dict
     if tokens is None or system not in prices or run_of(config) not in tokens:
         return None
     return prices[system] * tokens[run_of(config)]
+
+
+def pipeline_cost(pipeline: dict, prices: dict[str, float], tokens: dict[str, int] | None) -> float | None:
+    finders = [cost(f, "native:document", prices, tokens) for f in pipeline["finders"]]
+    return None if None in finders else pipeline["measured_cost"] + sum(finders)
 
 
 def system_rows(metrics: dict, level: str, prices: dict[str, float], tokens: dict[str, int] | None) -> list[dict]:
@@ -71,9 +82,27 @@ def system_rows(metrics: dict, level: str, prices: dict[str, float], tokens: dic
             "hit1": localization.get("hit@1"),
             "hit3": localization.get("hit@3"),
             "order_gap": r.get("order_gap"),
-            "cost": cost(system, config, prices, tokens),
+            "cost": pipeline_cost(r["pipeline"], prices, tokens) if "pipeline" in r else cost(system, config, prices, tokens),
         })
     return sorted(rows, key=lambda row: -row["auroc"])
+
+
+def explain_rows(metrics: dict, prices: dict[str, float], tokens: dict[str, int] | None) -> list[dict]:
+    rows = []
+    for name, r in metrics.get("explain", {}).items():
+        system, config = parse_name(name)
+        rows.append({
+            "name": name,
+            "family": family(system),
+            "label": label(system, config),
+            "pair1": r["pair@1"],
+            "ci_lo": r["pair@1_ci95"][0],
+            "ci_hi": r["pair@1_ci95"][1],
+            "pair2": r["pair@2"],
+            "n": r["n"],
+            "cost": pipeline_cost(r["pipeline"], prices, tokens) if "pipeline" in r else cost(system, config, prices, tokens),
+        })
+    return sorted(rows, key=lambda row: -row["pair1"])
 
 
 def frontier(rows: list[dict]) -> list[dict]:

@@ -19,6 +19,7 @@ from sklearn.metrics import roc_auc_score
 from cbench.candidates import DEFAULT_K, candidate_recall, read_pairs
 from cbench.data import Doc, docs_by_id, load_docs, split_ids
 from cbench.paths import CACHE, RESULTS, WORK
+from cbench import verify
 
 
 @dataclass
@@ -28,6 +29,8 @@ class System:
     doc_scores: dict[str, dict[str, float]] = field(default_factory=dict)
     sentence_scores: dict[str, dict[str, list[float]]] = field(default_factory=dict)
     order_gap: dict[str, float] = field(default_factory=dict)
+    pipelines: dict[str, dict] = field(default_factory=dict)
+    verify_rows: list[dict] = field(default_factory=list)
     incomplete: dict[str, str] = field(default_factory=dict)
 
 
@@ -87,8 +90,26 @@ def discover_systems() -> list[System]:
             system.doc_scores["native:document"] = {r["key"]: r["p_document"] for r in native}
             system.doc_scores["native:max-sentence"] = {r["key"]: max(r["p_sentences"]) for r in native}
             system.sentence_scores["native"] = {r["key"]: r["p_sentences"] for r in native}
+        _add_verify(system, model_dir, doc_fingerprints)
         systems.append(system)
     return systems
+
+
+def _add_verify(system: System, model_dir: Path, doc_fingerprints: dict[str, str]) -> None:
+    rows = current_rows(model_dir / "verify_all.jsonl", doc_fingerprints)
+    if not rows:
+        return
+    if len(rows) < len(doc_fingerprints):
+        system.incomplete["verify"] = f"{len(rows)}/{len(doc_fingerprints)}"
+        return
+    if len({tuple(r["finders"]) for r in rows}) > 1:
+        system.incomplete["verify"] = "mixed finders"
+        return
+    lengths = {d.id: len(d.sentences) for d in load_docs()}
+    system.doc_scores["native:verify"] = {r["key"]: verify.doc_score(r) for r in rows}
+    system.sentence_scores["native:verify"] = {r["key"]: verify.sentence_scores(r, lengths[r["key"]]) for r in rows}
+    system.pipelines["native:verify"] = {"finders": rows[0]["finders"], "measured_cost": verify.measured_cost(rows)}
+    system.verify_rows = rows
 
 
 def tune_threshold(labels: np.ndarray, scores: np.ndarray) -> float:
@@ -270,10 +291,11 @@ def doc_level(systems: list[System], source: str) -> dict:
     for system in systems:
         if source in system.pair_scores:
             doc_scores, sentence_scores = doc_scores_from_pairs(system.pair_scores[source])
-            configurations.append((f"{system.name} [{source}]", doc_scores, sentence_scores))
+            configurations.append((f"{system.name} [{source}]", doc_scores, sentence_scores, None))
         for name, scores in system.doc_scores.items():
-            configurations.append((f"{system.name} [{name}]", scores, system.sentence_scores.get("native", {})))
-    for name, doc_scores, sentence_scores in configurations:
+            sentences = system.sentence_scores.get(name, system.sentence_scores.get("native", {}))
+            configurations.append((f"{system.name} [{name}]", scores, sentences, system.pipelines.get(name)))
+    for name, doc_scores, sentence_scores, pipeline in configurations:
         result = evaluate_scores(doc_scores, lambda k: docs[k].label, lambda k: splits[k])
         if result is None:
             continue
@@ -284,8 +306,66 @@ def doc_level(systems: list[System], source: str) -> dict:
             "auroc_by_length_tertile": length_tertiles(doc_scores, docs, splits),
             "recall_by": recall_breakdown(predicted, docs),
             "localization": localization(sentence_scores, docs, splits),
+            **({"pipeline": pipeline} if pipeline else {}),
         }
     add_paired_deltas(results)
+    return results
+
+
+def explainable_docs(docs: dict[str, Doc], splits: dict[str, str]) -> list[str]:
+    return sorted(k for k, d in docs.items() if splits[k] == "test" and d.label and d.ref_idx)
+
+
+def pair_hits(hits: list[tuple[bool, bool]], level: float = 0.95) -> dict:
+    """pair@1 / pair@2 with a percentile bootstrap interval for pair@1 over the same documents."""
+    top1, top2 = np.array([h[0] for h in hits]), np.array([h[1] for h in hits])
+    rng = np.random.default_rng(BOOTSTRAP_SEED)
+    means = [top1[rng.integers(0, len(top1), len(top1))].mean() for _ in range(BOOTSTRAP_ROUNDS)]
+    tail = (1 - level) / 2 * 100
+    return {
+        "n": len(hits),
+        "pair@1": float(top1.mean()),
+        "pair@1_ci95": (float(np.percentile(means, tail)), float(np.percentile(means, 100 - tail))),
+        "pair@2": float(top2.mean()),
+    }
+
+
+def explain_level(systems: list[System], source: str) -> dict:
+    """How often each system's top pair (and top two) is a gold contradicting pair."""
+    docs, splits = docs_by_id(), split_ids()
+    keys = explainable_docs(docs, splits)
+    results = {}
+    verifiers = [s for s in systems if s.verify_rows]
+    groups = [[v] for v in verifiers]
+    if len({tuple(v.verify_rows[0]["finders"]) for v in verifiers}) == 1 and len(verifiers) > 1:
+        groups.append(verifiers)
+    native = {s.name: s.sentence_scores["native"] for s in systems if "native" in s.sentence_scores}
+    for group in groups:
+        finders = group[0].verify_rows[0]["finders"]
+        if any(m not in native for m in finders):
+            continue
+        by_doc = [{r["key"]: r for r in v.verify_rows} for v in group]
+        hits = []
+        for k in keys:
+            i, partners = verify.explain([rows[k] for rows in by_doc], [native[m][k] for m in finders])
+            hits.append((verify.is_gold_pair(docs[k], i, partners[0]),
+                         any(verify.is_gold_pair(docs[k], i, o) for o in partners[:2])))
+        name = " + ".join(v.name for v in group) + " [explain]"
+        results[name] = {**pair_hits(hits), "pipeline": {
+            "finders": finders, "measured_cost": sum(verify.measured_cost(v.verify_rows) for v in group)}}
+    for system in systems:
+        if source not in system.pair_scores:
+            continue
+        ranked = defaultdict(list)
+        for key, score in system.pair_scores[source].items():
+            doc_id, i, j = key.rsplit(":", 2)
+            ranked[doc_id].append((score, (int(i), int(j))))
+        hits = []
+        for k in keys:
+            top = [pair for _, pair in sorted(ranked.get(k, []), reverse=True)[:2]]
+            gold = [tuple(sorted(p)) in docs[k].gold_pairs for p in top]
+            hits.append((bool(gold[:1] and gold[0]), any(gold)))
+        results[f"{system.name} [{source}]"] = pair_hits(hits)
     return results
 
 
@@ -358,6 +438,23 @@ def render(report: dict) -> str:
             f"| {name} | {_auroc(r)} | {_gap(r)} | {_f(r['f1_test'])} | {_f(r['accuracy_test'])} | {_f(r['precision_test'])} "
             f"| {_f(r['recall_test'])} | {_f(loc['hit@1'])} | {_f(loc['hit@3'])} | {r['n_docs_scored']} |"
         )
+    if report.get("explain"):
+        n = next(iter(report["explain"].values()))["n"]
+        lines += [
+            "",
+            "## Explain (naming the contradicting pair)",
+            "",
+            f"Contradictory test documents with a labelled partner sentence ({n}). Pair@1: the top predicted pair "
+            "is a gold pair; Pair@2: one of the top two is. Explain systems take the sentence the finders rate "
+            "highest and the partner the verifiers name for it; pairwise systems use their highest-scoring "
+            "candidate pairs, so candidate recall caps them.",
+            "",
+            "| System | Pair@1 | 95% CI | Pair@2 |",
+            "|---|---|---|---|",
+        ]
+        for name, r in sorted(report["explain"].items(), key=lambda x: -x[1]["pair@1"]):
+            lo, hi = r["pair@1_ci95"]
+            lines.append(f"| {name} | {r['pair@1']:.3f} | [{lo:.3f}, {hi:.3f}] | {r['pair@2']:.3f} |")
     lines += ["", "### Recall by contradiction type (test positives; multi-label)", ""]
     configs = sorted(report["doc_level"])
     types = sorted({t for r in report["doc_level"].values() for t in r["recall_by"]["contra_type"]})
@@ -410,6 +507,7 @@ def build_report(source: str) -> dict:
         },
         "pair_level": pair_level(systems),
         "doc_level": doc_level(systems, source),
+        "explain": explain_level(systems, source),
         "always_yes": always_yes(docs, splits),
         "incomplete": [(s.name, src, progress) for s in systems for src, progress in s.incomplete.items()],
     }

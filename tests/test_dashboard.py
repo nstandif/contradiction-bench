@@ -1,6 +1,6 @@
 import pytest
 
-from cbench.dashboard import frontier, parse_name, run_of, system_rows
+from cbench.dashboard import explain_rows, frontier, parse_name, run_of, system_rows
 
 
 def result(auroc, vs_best=None, **extra):
@@ -24,6 +24,9 @@ METRICS = {
     },
     "doc_level": {
         "typesafe/jev-1.14 [native:document]": result(0.86),
+        "typesafe/jev-1.14 [native:verify]": result(
+            0.85, pipeline={"finders": ["typesafe/jev-1.14", "nli:x"], "measured_cost": 0.25}
+        ),
         "typesafe/jev-1.14 [cand_k20]": result(0.8, {"system": "x", "delta": 0.06, "ci95": [-0.01, 0.12]}),
         "nli:nli-deberta-v3-xsmall [cand_k20]": result(0.75, {"system": "x", "delta": 0.11, "ci95": [0.05, 0.17]}),
     },
@@ -77,3 +80,22 @@ def test_frontier_starts_from_the_best_free_model():
         {"name": "unpriced", "cost": None, "auroc": 0.99},
     ]
     assert [r["name"] for r in frontier(rows)] == ["free-good", "mid-better"]
+
+
+def test_verify_pipeline_costs_measured_spend_plus_finder_native_runs():
+    rows = {r["name"]: r for r in system_rows(METRICS, "doc_level", PRICES, TOKENS)}
+    verify = rows["typesafe/jev-1.14 [native:verify]"]
+    assert verify["cost"] == pytest.approx(1.25)
+    assert verify["label"] == "jev-1.14 · find → verify"
+    assert next(r for r in system_rows(METRICS, "doc_level", {}, None) if r["config"] == "native:verify")["cost"] is None
+
+
+def test_explain_rows_cost_pipelines_and_pairwise_runs():
+    metrics = {"explain": {
+        "typesafe/jev-1.14 + nli:x [explain]": {"n": 259, "pair@1": 0.6, "pair@1_ci95": [0.55, 0.65], "pair@2": 0.7,
+                                               "pipeline": {"finders": ["typesafe/jev-1.14"], "measured_cost": 0.25}},
+        "typesafe/jev-1.14 [cand_k20]": {"n": 259, "pair@1": 0.4, "pair@1_ci95": [0.35, 0.45], "pair@2": 0.5},
+    }}
+    rows = explain_rows(metrics, PRICES, TOKENS)
+    assert [r["label"] for r in rows] == ["jev-1.14 + x · find → explain", "jev-1.14 · cand_k20"]
+    assert rows[0]["cost"] == pytest.approx(1.25) and rows[1]["cost"] == pytest.approx(2.0)

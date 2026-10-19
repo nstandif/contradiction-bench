@@ -5,7 +5,7 @@ import numpy as np
 import pysbd
 import pytest
 
-from cbench import evaluate
+from cbench import evaluate, verify
 from cbench.candidates import read_pairs
 from cbench.data import load_docs, locate, parse_scope, split_sentences
 from cbench.decide import MODELS, chunked, resolve_model
@@ -130,6 +130,17 @@ def test_evaluator_end_to_end_on_fabricated_caches(tmp_path, monkeypatch):
     _write(tmp_path / "decide" / "vendor__oracle" / "native_all.jsonl", native[1:] + [stale])
     _write(tmp_path / "decide" / "vendor__full" / "native_all.jsonl", native)
 
+    def verify_row(d):
+        shortlist = sorted(d.evidence_idx) or [0]
+        options = [f"s{j}" for j in range(len(d.sentences))] + ["itself", "none"]
+        probabilities = {o: 0.0 for o in options}
+        probabilities["itself" if d.label else "none"] = 1.0
+        answers = {f"q{i}_{o}": probabilities for i in shortlist for o in "fr"}
+        return {"key": d.id, "fingerprint": d.fingerprint, "finders": ["vendor/full"], "shortlist": shortlist,
+                "controls": [], "probabilities": answers, "usage": [{"cost": 0.001}]}
+
+    _write(tmp_path / "decide" / "vendor__full" / "verify_all.jsonl", [verify_row(d) for d in docs.values()])
+
     report = evaluate.build_report("cand_k20")
 
     assert report["pair_level"]["nli:perfect"]["auroc_test"] == 1.0
@@ -149,7 +160,68 @@ def test_evaluator_end_to_end_on_fabricated_caches(tmp_path, monkeypatch):
     full = report["doc_level"]["vendor/full [native:max-sentence]"]
     assert full["auroc_test"] == 1.0 and full["localization"]["hit@1"] == 1.0
     assert ("vendor/oracle", "native", f"{len(docs) - 1}/{len(docs)}") in report["incomplete"]
+    verified = report["doc_level"]["vendor/full [native:verify]"]
+    assert verified["auroc_test"] == 1.0 and verified["localization"]["hit@1"] == 1.0
+    assert verified["pipeline"] == {"finders": ["vendor/full"], "measured_cost": pytest.approx(0.001 * len(docs))}
+    explained = report["explain"]["vendor/full [explain]"]
+    intra = [d for d in docs.values() if evaluate.split_ids()[d.id] == "test" and d.label and d.ref_idx]
+    assert explained["n"] == len(intra) and explained["pipeline"]["finders"] == ["vendor/full"]
+    assert explained["pair@1"] == pytest.approx(np.mean([verify.is_gold_pair(d, min(d.evidence_idx), "itself") for d in intra]))
+    assert "nli:perfect [cand_k20]" in report["explain"]
+    assert "## Explain (naming the contradicting pair)" in evaluate.render(report)
 
     yes = report["always_yes"]
     assert yes["precision"] == pytest.approx(314 / 624) and yes["recall"] == 1.0
     assert "| always yes |" in evaluate.render(report)
+
+
+def test_verify_shortlist_keeps_confident_sentences_within_bounds():
+    assert verify.finder_shortlist([0.1, 0.2, 0.05]) == {1}
+    assert verify.finder_shortlist([0.9, 0.4, 0.1, 0.35]) == {0, 1, 3}
+    assert len(verify.finder_shortlist([0.9] * 12)) == verify.SHORTLIST_MAX
+
+
+@needs_data
+def test_verify_plan_unions_finders_and_draws_controls_outside_the_shortlist():
+    doc = next(d for d in load_docs() if len(d.sentences) >= 10)
+    a = [0.0] * len(doc.sentences); a[2] = 0.9
+    b = [0.0] * len(doc.sentences); b[5] = 0.8
+    shortlist, controls = verify.plan(doc, [a, b])
+    assert shortlist == [2, 5]
+    assert len(controls) == verify.CONTROLS and not set(controls) & set(shortlist)
+    assert verify.plan(doc, [a, b]) == (shortlist, controls)
+
+
+def test_verify_questions_offer_every_other_sentence_in_both_orders():
+    forward, backward = verify.partner_question(1, 4, False), verify.partner_question(1, 4, True)
+    assert list(forward["criteria"]) == ["s0", "s2", "s3", "itself", "none"]
+    assert list(backward["criteria"]) == list(reversed(forward["criteria"]))
+    assert list(verify.verify_questions(4, [1, 3])) == ["q1_f", "q1_r", "q3_f", "q3_r"]
+
+
+def test_verify_scores_documents_by_p_not_none_and_sentences_by_best_partner():
+    spread = {f"s{j}": 0.03 for j in range(20)} | {"itself": 0.0, "none": 0.4}
+    focused = {"s0": 0.0, "s2": 0.5, "itself": 0.0, "none": 0.5}
+    row = {"shortlist": [1, 4], "probabilities": {
+        "q1_f": spread, "q1_r": spread, "q4_f": focused, "q4_r": focused}}
+    assert verify.doc_score(row) == pytest.approx(0.6)
+    assert verify.predicted_pair(row) == (4, "s2")
+    assert verify.sentence_scores(row, 6) == pytest.approx([0.03, 0.03, 0.5, 0, 0.5, 0])
+
+
+@needs_data
+def test_explain_takes_the_finders_sentence_and_averages_verifier_partners():
+    doc = next(d for d in load_docs() if d.label and d.ref_idx and d.evidence_idx != d.ref_idx)
+    e, r = doc.evidence_idx[0], next(x for x in doc.ref_idx if x != doc.evidence_idx[0])
+    other = next(i for i in range(len(doc.sentences)) if i not in (e, r))
+    options = [f"s{j}" for j in range(len(doc.sentences))] + ["itself", "none"]
+    def row(partner_of_e, partner_p):
+        answers = {}
+        for i, (o, p) in {e: (partner_of_e, partner_p), other: (f"s{r}", 0.99)}.items():
+            probabilities = {x: 0.0 for x in options} | {o: p, "none": 1 - p}
+            answers |= {f"q{i}_f": probabilities, f"q{i}_r": probabilities}
+        return {"shortlist": sorted({e, other}), "probabilities": answers}
+    finder = [0.0] * len(doc.sentences); finder[e] = 0.9; finder[other] = 0.4
+    i, partners = verify.explain([row(f"s{r}", 0.6), row(f"s{other}", 0.5)], [finder])
+    assert i == e and partners[0] == f"s{r}"
+    assert verify.is_gold_pair(doc, i, partners[0]) and not verify.is_gold_pair(doc, i, partners[1])
