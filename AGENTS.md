@@ -82,6 +82,17 @@ item of an input and lists partial runs separately.
   document and take the max. Candidate recall caps them (gold pair present in
   59.5% of documents at K=20, 68.5% at K=50); this cap is equal across pairwise
   models, so model-vs-model comparisons are fair, but pairwise-vs-native are not.
+  **Why TF-IDF:** it is model-free, so every pairwise system gets the same
+  candidates, and no tested retriever beats it at K=20. On 2026-10-19, gold-pair
+  recall at K=20 (321 documents) was:
+  - TF-IDF 0.595, BM25 0.570, MiniLM-L6 0.558, bge-small 0.526.
+  - BM25 + vector hybrids (reciprocal-rank fusion) reached at most 0.595. At
+    K=50 they reach 0.726, against 0.685 for TF-IDF.
+
+  Similarity is the wrong signal: 20.9% of gold pairs rank beyond 50 for every
+  retriever, and 12.1% share no content words. Ranking pairs by D1 Ultra's
+  native sentence scores reaches 0.788 at K=20. That ranking depends on one
+  model, so it isn't used as the shared baseline.
   Decision models also run in **native** mode: the whole document with one noul
   per sentence plus one document-level noul, which can catch the 73
   intra-sentence contradictions that pairwise methods structurally miss.
