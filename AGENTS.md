@@ -22,6 +22,11 @@ State as of 2026-10-18: **first full sweep done**; `results/report.md` and
   v2-xlarge and v2-xxlarge (4, 17, 33 h). Running them needs "Hosted NLI" below,
   which the user hasn't chosen yet.
 - **Not run:** `cand_k20` for decision models (about $6 more).
+- **Find → verify** (`results/verify.md`): a shortlist from native sentence scores plus a
+  whole-document "which sentence does this contradict?" pass by the Decider. It doesn't beat D1
+  Ultra native on detection (0.841 vs 0.854) but names the gold pair 54% of the time. The code is
+  on the unmerged branch `feat/verify`, and its scores are cached in
+  `results/cache/decide/perplexity__pplx-decider-v1.2/verify_all.jsonl`.
 
 To re-run anything: set up the checkout (`uv sync --all-groups &&
 uv run python -m cbench.fetch && uv run python -m cbench.candidates --k 20`),
