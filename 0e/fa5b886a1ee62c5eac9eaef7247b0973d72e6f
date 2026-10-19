@@ -1,0 +1,45 @@
+tests/test_app.py
+  s_3383eb2c1c2d15::t_1a3956d2cc79de 42-45,58
+src/cbench/verify.py
+  s_3383eb2c1c2d15::t_d6e289dba366c8 1,10-15,126-141
+  s_3383eb2c1c2d15::t_df3cca5add2f81 142-143
+tests/test_dashboard.py
+  s_3383eb2c1c2d15::t_1a3956d2cc79de 3,91-101
+tests/test_cbench.py
+  s_3383eb2c1c2d15::t_976376c5b7bff3 169
+  s_3383eb2c1c2d15::t_1a3956d2cc79de 166-168,170-171,210-227
+results/verify.md
+  s_3383eb2c1c2d15::t_e1712ac1604b8b 1,3,5-15,90-143
+app/leaderboard.py
+  s_3383eb2c1c2d15::t_000e665eab6d94 6-8,108-148,186-187
+results/report.md
+  s_3383eb2c1c2d15::t_111287e6bf7592 60,63,109-130,133-143,147-152
+src/cbench/dashboard.py
+  s_3383eb2c1c2d15::t_000e665eab6d94 15,36,90-105
+  s_3383eb2c1c2d15::t_8321ffece0bc65 106-107
+src/cbench/evaluate.py
+  s_3383eb2c1c2d15::t_111287e6bf7592 441-457
+  s_3383eb2c1c2d15::t_dcf43083486587 33,112,315-341,343-344,347-349,351-371,510
+  s_3383eb2c1c2d15::t_acc443e84b7302 342,345-346,350
+AGENTS.md
+  s_3383eb2c1c2d15::t_e1712ac1604b8b 25-30,63-64,107-109
+results/metrics.json
+  s_3383eb2c1c2d15::t_111287e6bf7592 4654-4764,5805-5915,7373-7528
+  s_3383eb2c1c2d15::t_30fb9098696550 7529-7530
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0efa5b886a1ee62c5eac9eaef7247b0973d72e6f",
+  "prompts": {},
+  "sessions": {
+    "s_3383eb2c1c2d15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "790bfdaa-84eb-4819-9b71-d1e0762a1b42",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Nathan Standiford <nbstandiford@gmail.com>"
+    }
+  }
+}
