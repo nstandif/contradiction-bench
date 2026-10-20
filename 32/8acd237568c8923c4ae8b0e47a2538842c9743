@@ -1,0 +1,28 @@
+app/leaderboard.py
+  s_3303618dbb450a::t_77e3cd9a3b0634 4-6
+pyproject.toml
+  s_3303618dbb450a::t_108d96ba7414e4 22
+  s_3303618dbb450a::t_fb981dbcac07da 5-7
+app/export_charts.py
+  s_3303618dbb450a::t_586f9723b38743 1-39
+app/charts.py
+  s_3303618dbb450a::t_77e3cd9a3b0634 1-92
+uv.lock
+  s_3303618dbb450a::t_754604744701ad 76,98,154-167,403-425,564-572,910-931
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "328acd237568c8923c4ae8b0e47a2538842c9743",
+  "prompts": {},
+  "sessions": {
+    "s_3303618dbb450a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f353260a-f2fb-4b8a-a780-4da005be9226",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Nathan Standiford <nbstandiford@gmail.com>"
+    }
+  }
+}
