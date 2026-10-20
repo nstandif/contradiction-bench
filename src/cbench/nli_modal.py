@@ -8,6 +8,8 @@ runs remotely. Needs `uv sync --group modal` and a token from `modal token new`;
 """
 
 import argparse
+import os
+from concurrent.futures import ThreadPoolExecutor
 
 import modal
 
@@ -25,12 +27,18 @@ image = (
 )
 app = modal.App("cbench-nli", image=image)
 weights = modal.Volume.from_name("cbench-hf-cache", create_if_missing=True)
-secrets = []
-if modal.is_local():
+
+
+def hf_token() -> str | None:
+    if not modal.is_local():
+        return os.environ.get("HF_TOKEN")
     from cbench.decide import load_env
 
-    if token := load_env("HF_TOKEN"):
-        secrets.append(modal.Secret.from_dict({"HF_TOKEN": token}))
+    return load_env("HF_TOKEN")
+
+
+# Defined the same way locally and in the container, which must agree on the function's dependencies.
+secrets = [modal.Secret.from_dict({"HF_TOKEN": token} if (token := hf_token()) else {})]
 
 
 @app.cls(gpu="T4", volumes={HF_CACHE: weights}, secrets=secrets, timeout=900, scaledown_window=60)
@@ -64,13 +72,15 @@ def main() -> None:
     parser.add_argument("--limit", type=int, help="score a seeded random sample of N pending pairs")
     args = parser.parse_args()
 
-    with modal.enable_output(), app.run():
+    def run(model_name: str) -> None:
         for test in args.tests:
-            for model_name in args.models:
-                scored, seconds = score_model(model_name, test, limit=args.limit, batch_size=GPU_BATCH,
-                                              make_scorer=lambda name, _: ModalScorer(name, args.gpu))
-                if scored:
-                    print(f"{model_name} {test}: {scored} pairs in {seconds:.0f}s on {args.gpu}", flush=True)
+            scored, seconds = score_model(model_name, test, limit=args.limit, batch_size=GPU_BATCH,
+                                          make_scorer=lambda name, _: ModalScorer(name, args.gpu))
+            if scored:
+                print(f"{model_name} {test}: {scored} pairs in {seconds:.0f}s on {args.gpu}", flush=True)
+
+    with modal.enable_output(), app.run(), ThreadPoolExecutor(len(args.models)) as pool:
+        list(pool.map(run, args.models))
 
 
 if __name__ == "__main__":

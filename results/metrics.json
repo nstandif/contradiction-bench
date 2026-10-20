@@ -70,6 +70,189 @@
         ]
       }
     },
+    "nli:DeBERTa-v3-base-mnli-fever-anli": {
+      "n_test": 530,
+      "auroc_test": 0.8234604105571848,
+      "auroc_ci95_test": [
+        0.7857886834757637,
+        0.8577064522971256
+      ],
+      "threshold": 0.7197265625,
+      "f1_test": 0.7218390804597701,
+      "accuracy_test": 0.7716981132075472,
+      "precision_test": 0.7302325581395349,
+      "recall_test": 0.7136363636363636,
+      "n_scored": 763,
+      "auroc_by_type_all_splits": {
+        "Causal": {
+          "n_pos": 15,
+          "auroc": 0.7858220211161387
+        },
+        "Content": {
+          "n_pos": 212,
+          "auroc": 0.8462285494749424
+        },
+        "Emotion/Mood/Feeling": {
+          "n_pos": 59,
+          "auroc": 0.8036084055525731
+        },
+        "Factual": {
+          "n_pos": 36,
+          "auroc": 0.8126885369532428
+        },
+        "Negation": {
+          "n_pos": 66,
+          "auroc": 0.8826957356369121
+        },
+        "Numeric": {
+          "n_pos": 55,
+          "auroc": 0.8341423282599754
+        },
+        "Other": {
+          "n_pos": 1,
+          "auroc": 0.9864253393665158
+        },
+        "Perspective/View/Opinion": {
+          "n_pos": 74,
+          "auroc": 0.7658676776323836
+        },
+        "Relation": {
+          "n_pos": 17,
+          "auroc": 0.8332446100612191
+        }
+      },
+      "order_gap": null,
+      "vs_best": {
+        "system": "perplexity/pplx-decider-v1.2",
+        "delta": 0.06834310850439873,
+        "ci95": [
+          0.03480188093666341,
+          0.10242991306259792
+        ]
+      }
+    },
+    "nli:DeBERTa-v3-large-mnli-fever-anli-ling-wanli": {
+      "n_test": 530,
+      "auroc_test": 0.8558357771260997,
+      "auroc_ci95_test": [
+        0.8243203836126407,
+        0.8869909811262394
+      ],
+      "threshold": 0.28271484375,
+      "f1_test": 0.7297297297297297,
+      "accuracy_test": 0.7735849056603774,
+      "precision_test": 0.7232142857142857,
+      "recall_test": 0.7363636363636363,
+      "n_scored": 763,
+      "auroc_by_type_all_splits": {
+        "Causal": {
+          "n_pos": 15,
+          "auroc": 0.8036953242835595
+        },
+        "Content": {
+          "n_pos": 212,
+          "auroc": 0.8599312729445915
+        },
+        "Emotion/Mood/Feeling": {
+          "n_pos": 59,
+          "auroc": 0.8595176010430248
+        },
+        "Factual": {
+          "n_pos": 36,
+          "auroc": 0.8180304172951232
+        },
+        "Negation": {
+          "n_pos": 66,
+          "auroc": 0.8884546825723296
+        },
+        "Numeric": {
+          "n_pos": 55,
+          "auroc": 0.862731386260798
+        },
+        "Other": {
+          "n_pos": 1,
+          "auroc": 0.996606334841629
+        },
+        "Perspective/View/Opinion": {
+          "n_pos": 74,
+          "auroc": 0.7961507887978476
+        },
+        "Relation": {
+          "n_pos": 17,
+          "auroc": 0.835773223316476
+        }
+      },
+      "order_gap": null,
+      "vs_best": {
+        "system": "perplexity/pplx-decider-v1.2",
+        "delta": 0.0359677419354838,
+        "ci95": [
+          0.0054470478181620095,
+          0.06777570946796721
+        ]
+      }
+    },
+    "nli:mDeBERTa-v3-base-xnli-multilingual-nli-2mil7": {
+      "n_test": 530,
+      "auroc_test": 0.7762683284457478,
+      "auroc_ci95_test": [
+        0.7322637416440335,
+        0.8145494967483987
+      ],
+      "threshold": 0.1748046875,
+      "f1_test": 0.6783625730994152,
+      "accuracy_test": 0.6886792452830188,
+      "precision_test": 0.5938566552901023,
+      "recall_test": 0.7909090909090909,
+      "n_scored": 763,
+      "auroc_by_type_all_splits": {
+        "Causal": {
+          "n_pos": 15,
+          "auroc": 0.7425339366515836
+        },
+        "Content": {
+          "n_pos": 212,
+          "auroc": 0.7932745667207377
+        },
+        "Emotion/Mood/Feeling": {
+          "n_pos": 59,
+          "auroc": 0.7333576194493443
+        },
+        "Factual": {
+          "n_pos": 36,
+          "auroc": 0.7756096028154852
+        },
+        "Negation": {
+          "n_pos": 66,
+          "auroc": 0.865984505690388
+        },
+        "Numeric": {
+          "n_pos": 55,
+          "auroc": 0.819600987248046
+        },
+        "Other": {
+          "n_pos": 1,
+          "auroc": 1.0
+        },
+        "Perspective/View/Opinion": {
+          "n_pos": 74,
+          "auroc": 0.7192735722147486
+        },
+        "Relation": {
+          "n_pos": 17,
+          "auroc": 0.7278413627894595
+        }
+      },
+      "order_gap": null,
+      "vs_best": {
+        "system": "perplexity/pplx-decider-v1.2",
+        "delta": 0.11553519061583573,
+        "ci95": [
+          0.07666523445785198,
+          0.1558371973551443
+        ]
+      }
+    },
     "nli:nli-deberta-v3-base": {
       "n_test": 530,
       "auroc_test": 0.8187829912023461,
@@ -558,6 +741,189 @@
         ]
       }
     },
+    "nli:deberta-v2-xlarge-mnli": {
+      "n_test": 530,
+      "auroc_test": 0.8464442815249267,
+      "auroc_ci95_test": [
+        0.8126964864479939,
+        0.8785929403274454
+      ],
+      "threshold": 0.783203125,
+      "f1_test": 0.6971153846153846,
+      "accuracy_test": 0.7622641509433963,
+      "precision_test": 0.7397959183673469,
+      "recall_test": 0.6590909090909091,
+      "n_scored": 763,
+      "auroc_by_type_all_splits": {
+        "Causal": {
+          "n_pos": 15,
+          "auroc": 0.8013574660633485
+        },
+        "Content": {
+          "n_pos": 212,
+          "auroc": 0.8595684282421241
+        },
+        "Emotion/Mood/Feeling": {
+          "n_pos": 59,
+          "auroc": 0.8418590382698061
+        },
+        "Factual": {
+          "n_pos": 36,
+          "auroc": 0.8476935646053293
+        },
+        "Negation": {
+          "n_pos": 66,
+          "auroc": 0.9014465926230633
+        },
+        "Numeric": {
+          "n_pos": 55,
+          "auroc": 0.8577745783628136
+        },
+        "Other": {
+          "n_pos": 1,
+          "auroc": 0.9502262443438915
+        },
+        "Perspective/View/Opinion": {
+          "n_pos": 74,
+          "auroc": 0.7813531857649505
+        },
+        "Relation": {
+          "n_pos": 17,
+          "auroc": 0.8384349214799042
+        }
+      },
+      "order_gap": null,
+      "vs_best": {
+        "system": "perplexity/pplx-decider-v1.2",
+        "delta": 0.04535923753665683,
+        "ci95": [
+          0.014965656101086359,
+          0.07621523110389487
+        ]
+      }
+    },
+    "nli:deberta-v2-xxlarge-mnli": {
+      "n_test": 530,
+      "auroc_test": 0.8561436950146628,
+      "auroc_ci95_test": [
+        0.8240641049412191,
+        0.8877981478761661
+      ],
+      "threshold": 0.2034912109375,
+      "f1_test": 0.728744939271255,
+      "accuracy_test": 0.7471698113207547,
+      "precision_test": 0.656934306569343,
+      "recall_test": 0.8181818181818182,
+      "n_scored": 763,
+      "auroc_by_type_all_splits": {
+        "Causal": {
+          "n_pos": 15,
+          "auroc": 0.7696832579185521
+        },
+        "Content": {
+          "n_pos": 212,
+          "auroc": 0.8688956714761376
+        },
+        "Emotion/Mood/Feeling": {
+          "n_pos": 59,
+          "auroc": 0.8411688012884423
+        },
+        "Factual": {
+          "n_pos": 36,
+          "auroc": 0.8591314731020613
+        },
+        "Negation": {
+          "n_pos": 66,
+          "auroc": 0.9180035650623886
+        },
+        "Numeric": {
+          "n_pos": 55,
+          "auroc": 0.861476758535582
+        },
+        "Other": {
+          "n_pos": 1,
+          "auroc": 0.997737556561086
+        },
+        "Perspective/View/Opinion": {
+          "n_pos": 74,
+          "auroc": 0.8079368961721902
+        },
+        "Relation": {
+          "n_pos": 17,
+          "auroc": 0.8297844024487623
+        }
+      },
+      "order_gap": null,
+      "vs_best": {
+        "system": "perplexity/pplx-decider-v1.2",
+        "delta": 0.035659824046920696,
+        "ci95": [
+          0.008720134125708425,
+          0.06459095687533571
+        ]
+      }
+    },
+    "nli:deberta-xlarge-mnli": {
+      "n_test": 530,
+      "auroc_test": 0.8531818181818182,
+      "auroc_ci95_test": [
+        0.8200917144310018,
+        0.8833404131234267
+      ],
+      "threshold": 0.4015953540802002,
+      "f1_test": 0.7152317880794702,
+      "accuracy_test": 0.7566037735849057,
+      "precision_test": 0.6952789699570815,
+      "recall_test": 0.7363636363636363,
+      "n_scored": 763,
+      "auroc_by_type_all_splits": {
+        "Causal": {
+          "n_pos": 15,
+          "auroc": 0.7924585218702865
+        },
+        "Content": {
+          "n_pos": 212,
+          "auroc": 0.8565802953982754
+        },
+        "Emotion/Mood/Feeling": {
+          "n_pos": 59,
+          "auroc": 0.8410154152925836
+        },
+        "Factual": {
+          "n_pos": 36,
+          "auroc": 0.8538838612368024
+        },
+        "Negation": {
+          "n_pos": 66,
+          "auroc": 0.9144042232277526
+        },
+        "Numeric": {
+          "n_pos": 55,
+          "auroc": 0.8657754010695187
+        },
+        "Other": {
+          "n_pos": 1,
+          "auroc": 0.9524886877828055
+        },
+        "Perspective/View/Opinion": {
+          "n_pos": 74,
+          "auroc": 0.7878806408218173
+        },
+        "Relation": {
+          "n_pos": 17,
+          "auroc": 0.8179398456215066
+        }
+      },
+      "order_gap": null,
+      "vs_best": {
+        "system": "perplexity/pplx-decider-v1.2",
+        "delta": 0.03862170087976535,
+        "ci95": [
+          0.010089845560658391,
+          0.06901374195296735
+        ]
+      }
+    },
     "nli:deberta-v3-large-tasksource-nli": {
       "n_test": 530,
       "auroc_test": 0.8699560117302052,
@@ -616,6 +982,67 @@
         "ci95": [
           -0.005096696717430808,
           0.050236839697518854
+        ]
+      }
+    },
+    "nli:albert-xlarge-vitaminc-mnli": {
+      "n_test": 530,
+      "auroc_test": 0.6452199413489735,
+      "auroc_ci95_test": [
+        0.59263667340016,
+        0.6910112390355823
+      ],
+      "threshold": 0.10589762032032013,
+      "f1_test": 0.5685071574642127,
+      "accuracy_test": 0.6018867924528302,
+      "precision_test": 0.516728624535316,
+      "recall_test": 0.6318181818181818,
+      "n_scored": 763,
+      "auroc_by_type_all_splits": {
+        "Causal": {
+          "n_pos": 15,
+          "auroc": 0.5733031674208146
+        },
+        "Content": {
+          "n_pos": 212,
+          "auroc": 0.6591074020319303
+        },
+        "Emotion/Mood/Feeling": {
+          "n_pos": 59,
+          "auroc": 0.5718229925607793
+        },
+        "Factual": {
+          "n_pos": 36,
+          "auroc": 0.5859728506787331
+        },
+        "Negation": {
+          "n_pos": 66,
+          "auroc": 0.7625805566982038
+        },
+        "Numeric": {
+          "n_pos": 55,
+          "auroc": 0.6944055944055945
+        },
+        "Other": {
+          "n_pos": 1,
+          "auroc": 1.0
+        },
+        "Perspective/View/Opinion": {
+          "n_pos": 74,
+          "auroc": 0.6087195793078146
+        },
+        "Relation": {
+          "n_pos": 17,
+          "auroc": 0.432392866648922
+        }
+      },
+      "order_gap": null,
+      "vs_best": {
+        "system": "perplexity/pplx-decider-v1.2",
+        "delta": 0.24658357771260997,
+        "ci95": [
+          0.20113117672750497,
+          0.297449085592468
         ]
       }
     },
@@ -2059,6 +2486,318 @@
         ]
       }
     },
+    "nli:DeBERTa-v3-base-mnli-fever-anli [cand_k20]": {
+      "n_test": 624,
+      "auroc_test": 0.6176546126977605,
+      "auroc_ci95_test": [
+        0.572997170905508,
+        0.6600770851533996
+      ],
+      "threshold": 0.982421875,
+      "f1_test": 0.6559006211180124,
+      "accuracy_test": 0.5560897435897436,
+      "precision_test": 0.5376782077393075,
+      "recall_test": 0.8407643312101911,
+      "n_docs_scored": 891,
+      "auroc_by_length_tertile": {
+        "short": 0.5624882980715222,
+        "medium": 0.5970398060214185,
+        "long": 0.6928661882650907
+      },
+      "recall_by": {
+        "contra_type": {
+          "Causal": {
+            "n": 29,
+            "recall": 0.6896551724137931
+          },
+          "Content": {
+            "n": 205,
+            "recall": 0.8341463414634146
+          },
+          "Emotion/Mood/Feeling": {
+            "n": 61,
+            "recall": 0.8524590163934426
+          },
+          "Factual": {
+            "n": 42,
+            "recall": 0.7619047619047619
+          },
+          "Negation": {
+            "n": 60,
+            "recall": 0.8666666666666667
+          },
+          "Numeric": {
+            "n": 49,
+            "recall": 0.8163265306122449
+          },
+          "Other": {
+            "n": 1,
+            "recall": 1.0
+          },
+          "Perspective/View/Opinion": {
+            "n": 66,
+            "recall": 0.803030303030303
+          },
+          "Relation": {
+            "n": 17,
+            "recall": 0.8823529411764706
+          }
+        },
+        "scope": {
+          "global": {
+            "n": 105,
+            "recall": 0.9047619047619048
+          },
+          "global+intra": {
+            "n": 1,
+            "recall": 0.0
+          },
+          "intra": {
+            "n": 54,
+            "recall": 0.7962962962962963
+          },
+          "local": {
+            "n": 154,
+            "recall": 0.8181818181818182
+          }
+        },
+        "doc_type": {
+          "news": {
+            "n": 109,
+            "recall": 0.6972477064220184
+          },
+          "story": {
+            "n": 94,
+            "recall": 0.9468085106382979
+          },
+          "wiki": {
+            "n": 111,
+            "recall": 0.8918918918918919
+          }
+        }
+      },
+      "localization": {
+        "n": 314,
+        "hit@1": 0.2070063694267516,
+        "hit@3": 0.3980891719745223
+      },
+      "vs_best": {
+        "system": "liquid/d1-ultra [native:document]",
+        "delta": 0.23598212451201972,
+        "ci95": [
+          0.1880984734968691,
+          0.2865429385725783
+        ]
+      }
+    },
+    "nli:DeBERTa-v3-large-mnli-fever-anli-ling-wanli [cand_k20]": {
+      "n_test": 624,
+      "auroc_test": 0.5954386685843435,
+      "auroc_ci95_test": [
+        0.5478404937627004,
+        0.6383516461780464
+      ],
+      "threshold": 0.77001953125,
+      "f1_test": 0.6596491228070176,
+      "accuracy_test": 0.5336538461538461,
+      "precision_test": 0.5212569316081331,
+      "recall_test": 0.8980891719745223,
+      "n_docs_scored": 891,
+      "auroc_by_length_tertile": {
+        "short": 0.5639861449166822,
+        "medium": 0.5998686603354213,
+        "long": 0.6360911777121148
+      },
+      "recall_by": {
+        "contra_type": {
+          "Causal": {
+            "n": 29,
+            "recall": 0.8275862068965517
+          },
+          "Content": {
+            "n": 205,
+            "recall": 0.9121951219512195
+          },
+          "Emotion/Mood/Feeling": {
+            "n": 61,
+            "recall": 0.9508196721311475
+          },
+          "Factual": {
+            "n": 42,
+            "recall": 0.8333333333333334
+          },
+          "Negation": {
+            "n": 60,
+            "recall": 0.9333333333333333
+          },
+          "Numeric": {
+            "n": 49,
+            "recall": 0.8775510204081632
+          },
+          "Other": {
+            "n": 1,
+            "recall": 1.0
+          },
+          "Perspective/View/Opinion": {
+            "n": 66,
+            "recall": 0.8181818181818182
+          },
+          "Relation": {
+            "n": 17,
+            "recall": 0.8823529411764706
+          }
+        },
+        "scope": {
+          "global": {
+            "n": 105,
+            "recall": 0.9619047619047619
+          },
+          "global+intra": {
+            "n": 1,
+            "recall": 1.0
+          },
+          "intra": {
+            "n": 54,
+            "recall": 0.8148148148148148
+          },
+          "local": {
+            "n": 154,
+            "recall": 0.8831168831168831
+          }
+        },
+        "doc_type": {
+          "news": {
+            "n": 109,
+            "recall": 0.7522935779816514
+          },
+          "story": {
+            "n": 94,
+            "recall": 0.9680851063829787
+          },
+          "wiki": {
+            "n": 111,
+            "recall": 0.9819819819819819
+          }
+        }
+      },
+      "localization": {
+        "n": 314,
+        "hit@1": 0.21019108280254778,
+        "hit@3": 0.4140127388535032
+      },
+      "vs_best": {
+        "system": "liquid/d1-ultra [native:document]",
+        "delta": 0.2581980686254367,
+        "ci95": [
+          0.21282172437903976,
+          0.3076055361751606
+        ]
+      }
+    },
+    "nli:mDeBERTa-v3-base-xnli-multilingual-nli-2mil7 [cand_k20]": {
+      "n_test": 624,
+      "auroc_test": 0.5975755085268133,
+      "auroc_ci95_test": [
+        0.5540154424305459,
+        0.6410093821583764
+      ],
+      "threshold": 0.5380859375,
+      "f1_test": 0.670995670995671,
+      "accuracy_test": 0.5128205128205128,
+      "precision_test": 0.5081967213114754,
+      "recall_test": 0.9872611464968153,
+      "n_docs_scored": 891,
+      "auroc_by_length_tertile": {
+        "short": 0.5449822130687136,
+        "medium": 0.544655485956759,
+        "long": 0.6964542000844237
+      },
+      "recall_by": {
+        "contra_type": {
+          "Causal": {
+            "n": 29,
+            "recall": 0.9655172413793104
+          },
+          "Content": {
+            "n": 205,
+            "recall": 0.9902439024390244
+          },
+          "Emotion/Mood/Feeling": {
+            "n": 61,
+            "recall": 1.0
+          },
+          "Factual": {
+            "n": 42,
+            "recall": 0.9523809523809523
+          },
+          "Negation": {
+            "n": 60,
+            "recall": 0.9833333333333333
+          },
+          "Numeric": {
+            "n": 49,
+            "recall": 1.0
+          },
+          "Other": {
+            "n": 1,
+            "recall": 1.0
+          },
+          "Perspective/View/Opinion": {
+            "n": 66,
+            "recall": 0.9696969696969697
+          },
+          "Relation": {
+            "n": 17,
+            "recall": 1.0
+          }
+        },
+        "scope": {
+          "global": {
+            "n": 105,
+            "recall": 0.9809523809523809
+          },
+          "global+intra": {
+            "n": 1,
+            "recall": 1.0
+          },
+          "intra": {
+            "n": 54,
+            "recall": 0.9814814814814815
+          },
+          "local": {
+            "n": 154,
+            "recall": 0.9935064935064936
+          }
+        },
+        "doc_type": {
+          "news": {
+            "n": 109,
+            "recall": 0.981651376146789
+          },
+          "story": {
+            "n": 94,
+            "recall": 0.9893617021276596
+          },
+          "wiki": {
+            "n": 111,
+            "recall": 0.990990990990991
+          }
+        }
+      },
+      "localization": {
+        "n": 314,
+        "hit@1": 0.19745222929936307,
+        "hit@3": 0.3821656050955414
+      },
+      "vs_best": {
+        "system": "liquid/d1-ultra [native:document]",
+        "delta": 0.2560612286829669,
+        "ci95": [
+          0.20902366540003364,
+          0.30453361664407796
+        ]
+      }
+    },
     "nli:nli-deberta-v3-base [cand_k20]": {
       "n_test": 624,
       "auroc_test": 0.6019878775426339,
@@ -2891,6 +3630,318 @@
         ]
       }
     },
+    "nli:deberta-v2-xlarge-mnli [cand_k20]": {
+      "n_test": 624,
+      "auroc_test": 0.6446887199506883,
+      "auroc_ci95_test": [
+        0.6010571440126986,
+        0.6877999332523612
+      ],
+      "threshold": 0.7041015625,
+      "f1_test": 0.6802259887005649,
+      "accuracy_test": 0.5464743589743589,
+      "precision_test": 0.5271453590192644,
+      "recall_test": 0.9585987261146497,
+      "n_docs_scored": 891,
+      "auroc_by_length_tertile": {
+        "short": 0.6244149035761093,
+        "medium": 0.5846635683976561,
+        "long": 0.7143098353735754
+      },
+      "recall_by": {
+        "contra_type": {
+          "Causal": {
+            "n": 29,
+            "recall": 0.9655172413793104
+          },
+          "Content": {
+            "n": 205,
+            "recall": 0.9463414634146341
+          },
+          "Emotion/Mood/Feeling": {
+            "n": 61,
+            "recall": 0.9180327868852459
+          },
+          "Factual": {
+            "n": 42,
+            "recall": 0.9523809523809523
+          },
+          "Negation": {
+            "n": 60,
+            "recall": 0.9833333333333333
+          },
+          "Numeric": {
+            "n": 49,
+            "recall": 0.9591836734693877
+          },
+          "Other": {
+            "n": 1,
+            "recall": 1.0
+          },
+          "Perspective/View/Opinion": {
+            "n": 66,
+            "recall": 0.9545454545454546
+          },
+          "Relation": {
+            "n": 17,
+            "recall": 1.0
+          }
+        },
+        "scope": {
+          "global": {
+            "n": 105,
+            "recall": 0.9619047619047619
+          },
+          "global+intra": {
+            "n": 1,
+            "recall": 1.0
+          },
+          "intra": {
+            "n": 54,
+            "recall": 0.9814814814814815
+          },
+          "local": {
+            "n": 154,
+            "recall": 0.948051948051948
+          }
+        },
+        "doc_type": {
+          "news": {
+            "n": 109,
+            "recall": 0.9174311926605505
+          },
+          "story": {
+            "n": 94,
+            "recall": 0.9893617021276596
+          },
+          "wiki": {
+            "n": 111,
+            "recall": 0.972972972972973
+          }
+        }
+      },
+      "localization": {
+        "n": 314,
+        "hit@1": 0.22929936305732485,
+        "hit@3": 0.42356687898089174
+      },
+      "vs_best": {
+        "system": "liquid/d1-ultra [native:document]",
+        "delta": 0.20894801725909184,
+        "ci95": [
+          0.16241854345545187,
+          0.25612818151859174
+        ]
+      }
+    },
+    "nli:deberta-v2-xxlarge-mnli [cand_k20]": {
+      "n_test": 624,
+      "auroc_test": 0.6662934045613313,
+      "auroc_ci95_test": [
+        0.6241503823483009,
+        0.7099156191525864
+      ],
+      "threshold": 0.72705078125,
+      "f1_test": 0.6727688787185355,
+      "accuracy_test": 0.5416666666666666,
+      "precision_test": 0.525,
+      "recall_test": 0.9363057324840764,
+      "n_docs_scored": 891,
+      "auroc_by_length_tertile": {
+        "short": 0.6255382887099794,
+        "medium": 0.6040614265508184,
+        "long": 0.7510764035458
+      },
+      "recall_by": {
+        "contra_type": {
+          "Causal": {
+            "n": 29,
+            "recall": 0.9310344827586207
+          },
+          "Content": {
+            "n": 205,
+            "recall": 0.926829268292683
+          },
+          "Emotion/Mood/Feeling": {
+            "n": 61,
+            "recall": 0.9016393442622951
+          },
+          "Factual": {
+            "n": 42,
+            "recall": 0.8809523809523809
+          },
+          "Negation": {
+            "n": 60,
+            "recall": 0.95
+          },
+          "Numeric": {
+            "n": 49,
+            "recall": 0.9795918367346939
+          },
+          "Other": {
+            "n": 1,
+            "recall": 1.0
+          },
+          "Perspective/View/Opinion": {
+            "n": 66,
+            "recall": 0.9393939393939394
+          },
+          "Relation": {
+            "n": 17,
+            "recall": 1.0
+          }
+        },
+        "scope": {
+          "global": {
+            "n": 105,
+            "recall": 0.9238095238095239
+          },
+          "global+intra": {
+            "n": 1,
+            "recall": 1.0
+          },
+          "intra": {
+            "n": 54,
+            "recall": 0.9444444444444444
+          },
+          "local": {
+            "n": 154,
+            "recall": 0.9415584415584416
+          }
+        },
+        "doc_type": {
+          "news": {
+            "n": 109,
+            "recall": 0.8899082568807339
+          },
+          "story": {
+            "n": 94,
+            "recall": 0.9680851063829787
+          },
+          "wiki": {
+            "n": 111,
+            "recall": 0.954954954954955
+          }
+        }
+      },
+      "localization": {
+        "n": 314,
+        "hit@1": 0.23248407643312102,
+        "hit@3": 0.43630573248407645
+      },
+      "vs_best": {
+        "system": "liquid/d1-ultra [native:document]",
+        "delta": 0.18734333264844882,
+        "ci95": [
+          0.14167707658616327,
+          0.23327019325211876
+        ]
+      }
+    },
+    "nli:deberta-xlarge-mnli [cand_k20]": {
+      "n_test": 624,
+      "auroc_test": 0.652943291555373,
+      "auroc_ci95_test": [
+        0.6096612111494982,
+        0.6947473106412745
+      ],
+      "threshold": 0.49771782755851746,
+      "f1_test": 0.6845039018952063,
+      "accuracy_test": 0.5464743589743589,
+      "precision_test": 0.5265866209262435,
+      "recall_test": 0.9777070063694268,
+      "n_docs_scored": 891,
+      "auroc_by_length_tertile": {
+        "short": 0.5800879985021532,
+        "medium": 0.602394423115781,
+        "long": 0.7512452511608273
+      },
+      "recall_by": {
+        "contra_type": {
+          "Causal": {
+            "n": 29,
+            "recall": 0.9655172413793104
+          },
+          "Content": {
+            "n": 205,
+            "recall": 0.9707317073170731
+          },
+          "Emotion/Mood/Feeling": {
+            "n": 61,
+            "recall": 0.9836065573770492
+          },
+          "Factual": {
+            "n": 42,
+            "recall": 0.9523809523809523
+          },
+          "Negation": {
+            "n": 60,
+            "recall": 0.9666666666666667
+          },
+          "Numeric": {
+            "n": 49,
+            "recall": 1.0
+          },
+          "Other": {
+            "n": 1,
+            "recall": 1.0
+          },
+          "Perspective/View/Opinion": {
+            "n": 66,
+            "recall": 0.9545454545454546
+          },
+          "Relation": {
+            "n": 17,
+            "recall": 0.9411764705882353
+          }
+        },
+        "scope": {
+          "global": {
+            "n": 105,
+            "recall": 0.9809523809523809
+          },
+          "global+intra": {
+            "n": 1,
+            "recall": 1.0
+          },
+          "intra": {
+            "n": 54,
+            "recall": 1.0
+          },
+          "local": {
+            "n": 154,
+            "recall": 0.9675324675324676
+          }
+        },
+        "doc_type": {
+          "news": {
+            "n": 109,
+            "recall": 0.963302752293578
+          },
+          "story": {
+            "n": 94,
+            "recall": 0.9680851063829787
+          },
+          "wiki": {
+            "n": 111,
+            "recall": 1.0
+          }
+        }
+      },
+      "localization": {
+        "n": 314,
+        "hit@1": 0.21337579617834396,
+        "hit@3": 0.42356687898089174
+      },
+      "vs_best": {
+        "system": "liquid/d1-ultra [native:document]",
+        "delta": 0.20069344565440717,
+        "ci95": [
+          0.15711154095923477,
+          0.24631481717051418
+        ]
+      }
+    },
     "nli:deberta-v3-large-tasksource-nli [cand_k20]": {
       "n_test": 624,
       "auroc_test": 0.6513766180398602,
@@ -2992,6 +4043,110 @@
         "ci95": [
           0.16040032917598862,
           0.2503189008083998
+        ]
+      }
+    },
+    "nli:albert-xlarge-vitaminc-mnli [cand_k20]": {
+      "n_test": 624,
+      "auroc_test": 0.6116550236285186,
+      "auroc_ci95_test": [
+        0.56667348997314,
+        0.6562681981805242
+      ],
+      "threshold": 0.11738748848438263,
+      "f1_test": 0.6702702702702703,
+      "accuracy_test": 0.5112179487179487,
+      "precision_test": 0.5073649754500819,
+      "recall_test": 0.9872611464968153,
+      "n_docs_scored": 891,
+      "auroc_by_length_tertile": {
+        "short": 0.6226362104474817,
+        "medium": 0.637906647807638,
+        "long": 0.5580835795694385
+      },
+      "recall_by": {
+        "contra_type": {
+          "Causal": {
+            "n": 29,
+            "recall": 1.0
+          },
+          "Content": {
+            "n": 205,
+            "recall": 0.9804878048780488
+          },
+          "Emotion/Mood/Feeling": {
+            "n": 61,
+            "recall": 1.0
+          },
+          "Factual": {
+            "n": 42,
+            "recall": 0.9761904761904762
+          },
+          "Negation": {
+            "n": 60,
+            "recall": 0.9833333333333333
+          },
+          "Numeric": {
+            "n": 49,
+            "recall": 0.9591836734693877
+          },
+          "Other": {
+            "n": 1,
+            "recall": 1.0
+          },
+          "Perspective/View/Opinion": {
+            "n": 66,
+            "recall": 1.0
+          },
+          "Relation": {
+            "n": 17,
+            "recall": 1.0
+          }
+        },
+        "scope": {
+          "global": {
+            "n": 105,
+            "recall": 0.9809523809523809
+          },
+          "global+intra": {
+            "n": 1,
+            "recall": 1.0
+          },
+          "intra": {
+            "n": 54,
+            "recall": 1.0
+          },
+          "local": {
+            "n": 154,
+            "recall": 0.987012987012987
+          }
+        },
+        "doc_type": {
+          "news": {
+            "n": 109,
+            "recall": 0.9908256880733946
+          },
+          "story": {
+            "n": 94,
+            "recall": 0.9893617021276596
+          },
+          "wiki": {
+            "n": 111,
+            "recall": 0.9819819819819819
+          }
+        }
+      },
+      "localization": {
+        "n": 314,
+        "hit@1": 0.1464968152866242,
+        "hit@3": 0.321656050955414
+      },
+      "vs_best": {
+        "system": "liquid/d1-ultra [native:document]",
+        "delta": 0.24198171358126153,
+        "ci95": [
+          0.1883435526614428,
+          0.2948791125382371
         ]
       }
     },
@@ -7428,6 +8583,33 @@
       ],
       "pair@2": 0.416988416988417
     },
+    "nli:DeBERTa-v3-base-mnli-fever-anli [cand_k20]": {
+      "n": 259,
+      "pair@1": 0.28185328185328185,
+      "pair@1_ci95": [
+        0.2277992277992278,
+        0.3359073359073359
+      ],
+      "pair@2": 0.3783783783783784
+    },
+    "nli:DeBERTa-v3-large-mnli-fever-anli-ling-wanli [cand_k20]": {
+      "n": 259,
+      "pair@1": 0.2972972972972973,
+      "pair@1_ci95": [
+        0.2471042471042471,
+        0.35135135135135137
+      ],
+      "pair@2": 0.3938223938223938
+    },
+    "nli:mDeBERTa-v3-base-xnli-multilingual-nli-2mil7 [cand_k20]": {
+      "n": 259,
+      "pair@1": 0.28185328185328185,
+      "pair@1_ci95": [
+        0.2277992277992278,
+        0.3436293436293436
+      ],
+      "pair@2": 0.3552123552123552
+    },
     "nli:nli-deberta-v3-base [cand_k20]": {
       "n": 259,
       "pair@1": 0.2625482625482625,
@@ -7500,6 +8682,33 @@
       ],
       "pair@2": 0.4015444015444015
     },
+    "nli:deberta-v2-xlarge-mnli [cand_k20]": {
+      "n": 259,
+      "pair@1": 0.33204633204633205,
+      "pair@1_ci95": [
+        0.277992277992278,
+        0.38996138996138996
+      ],
+      "pair@2": 0.4092664092664093
+    },
+    "nli:deberta-v2-xxlarge-mnli [cand_k20]": {
+      "n": 259,
+      "pair@1": 0.35135135135135137,
+      "pair@1_ci95": [
+        0.29343629343629346,
+        0.41312741312741313
+      ],
+      "pair@2": 0.4362934362934363
+    },
+    "nli:deberta-xlarge-mnli [cand_k20]": {
+      "n": 259,
+      "pair@1": 0.36293436293436293,
+      "pair@1_ci95": [
+        0.30878378378378385,
+        0.42084942084942084
+      ],
+      "pair@2": 0.416988416988417
+    },
     "nli:deberta-v3-large-tasksource-nli [cand_k20]": {
       "n": 259,
       "pair@1": 0.3590733590733591,
@@ -7508,6 +8717,15 @@
         0.42084942084942084
       ],
       "pair@2": 0.41312741312741313
+    },
+    "nli:albert-xlarge-vitaminc-mnli [cand_k20]": {
+      "n": 259,
+      "pair@1": 0.21235521235521235,
+      "pair@1_ci95": [
+        0.16216216216216217,
+        0.2625482625482625
+      ],
+      "pair@2": 0.28185328185328185
     },
     "nli:deberta-base-long-nli [cand_k20]": {
       "n": 259,
@@ -7535,41 +8753,6 @@
     "recall": 1.0
   },
   "incomplete": [
-    [
-      "nli:DeBERTa-v3-base-mnli-fever-anli",
-      "cand_k20",
-      "128/17815"
-    ],
-    [
-      "nli:DeBERTa-v3-large-mnli-fever-anli-ling-wanli",
-      "cand_k20",
-      "128/17815"
-    ],
-    [
-      "nli:mDeBERTa-v3-base-xnli-multilingual-nli-2mil7",
-      "cand_k20",
-      "128/17815"
-    ],
-    [
-      "nli:deberta-v2-xlarge-mnli",
-      "cand_k20",
-      "64/17815"
-    ],
-    [
-      "nli:deberta-v2-xxlarge-mnli",
-      "cand_k20",
-      "64/17815"
-    ],
-    [
-      "nli:deberta-xlarge-mnli",
-      "cand_k20",
-      "64/17815"
-    ],
-    [
-      "nli:albert-xlarge-vitaminc-mnli",
-      "cand_k20",
-      "64/17815"
-    ],
     [
       "openai/gpt-6-luna-decisions",
       "native",

@@ -2,7 +2,7 @@
 
 Benchmark of contradiction detectors on ContraDoc (Li et al., NAACL 2024): every
 hosted decision model on OpenRouter plus SubQ Snap, against 19 public 3-way NLI
-models run locally. The question it answers: how well do shipped, off-the-shelf
+models. The question it answers: how well do shipped, off-the-shelf
 models detect self-contradictions in real documents?
 
 ## Status
@@ -15,11 +15,10 @@ As of 2026-10-19: **first full sweep done**; `results/report.md` and
   `document`, so it can't take the shared request body) and is not run. GPT-6 Luna
   is missing one native document: OpenAI refuses question `s51` on it, so its
   native run stays partial and unreported.
-- **NLI:** 12 of 19 complete on `pair_test` and `cand_k20`. The other seven are
-  too slow on this CPU (`results/nli_timing.json`): the three MoritzLaurer models
-  (3–9 h each; 3–4× slower than the same-size cross-encoder models for a reason
-  not yet found), VitaminC ALBERT-xlarge (6 h) and Microsoft deberta-xlarge,
-  v2-xlarge and v2-xxlarge (4, 17, 33 h). Running them needs "Hosted NLI" below.
+- **NLI:** 19 of 19 complete on `pair_test` and `cand_k20`. Twelve ran on CPU. The
+  seven too slow for it (`results/nli_timing.json`: the three MoritzLaurer models,
+  VitaminC ALBERT-xlarge, Microsoft deberta-xlarge, v2-xlarge and v2-xxlarge; 3–33 h
+  each) ran on a Modal T4 via `cbench.nli_modal` in about 1.5 GPU-hours.
 - **Not run:** `cand_k20` for decision models (about $6 more).
 - **Find → verify / explain** (`cbench.verify`, `results/verify.md`): native sentence scores
   shortlist suspicious sentences, then a verifier reads the whole document and answers "which
@@ -52,6 +51,7 @@ far better than it is.
 | `cbench.data` | sentence splitting (pysbd), gold evidence location, dev/test split, fingerprints |
 | `cbench.candidates` | `pair_test` and top-K TF-IDF candidate pairs into `data/work/` |
 | `cbench.nli` | 3-way NLI scoring: `run`, `time`, `sweep` |
+| `cbench.nli_modal` | the same NLI scoring on a Modal GPU |
 | `cbench.decide` | decision-model client for OpenRouter, Vercel AI Gateway, SubQ |
 | `cbench.sweep` | decision-model sweep: `catalog`, `estimate`, `probe`, `run` |
 | `cbench.verify` | find → verify (detection) and find → explain (naming the pair) over native runs |
@@ -127,17 +127,20 @@ contradiction class). VitaminC's `REFUTES`/`SUPPORTS` map to contradiction/entai
 Weights total about 20 GB; disk is not a constraint. Several Microsoft and ynie
 models ship only `pytorch_model.bin`, loaded with torch's weights-only loader.
 
-### Hosted NLI (for models too slow on CPU)
+### GPU scoring on Modal
 
-Researched 2026-10-18; not set up yet.
-- **Replicate:** only `bart-large-mnli`, wrapped as zero-shot classification.
-  Wrong interface: it returns label scores, not premise/hypothesis 3-way probabilities.
-- **HF serverless (`hf-inference`):** a few of these models, also as
-  zero-shot classification. Same problem.
-- **HF Inference Endpoints (recommended if needed):** dedicated GPU running any
-  Hub model with raw sequence-classification output; T4 $0.50/h, L4 $0.80/h,
-  billed per minute, scale-to-zero. Would need a small HTTP scorer alongside
-  `NLIScorer`. Modal or similar GPU-per-second services are the alternative.
+`cbench.nli_modal` runs `NLIScorer` on a Modal GPU (T4 by default, `--gpu` to
+change) and writes the same cache files, so runs resume and mix freely with CPU
+runs. GPU scores match CPU scores to within 1.2e-6. Needs `uv sync --group modal`
+and `modal token new`; `HF_TOKEN` in `.env` is passed to the containers, and
+weights persist in the `cbench-hf-cache` volume.
+- All models run as threads inside one Modal app. Separate processes per model
+  hit Modal's app-creation rate limit.
+- The container rebuilds the module's secrets list, so it must be defined the same
+  way locally and remotely, or the container fails with "Function has N
+  dependencies but container got M object ids".
+- The Modal Starter plan includes $30/month of compute; the full seven-model run
+  used about 1.5 T4-hours (under $1).
 
 ## Decision models
 
@@ -180,8 +183,8 @@ $0.12 (Span-02, Decider Flash) to $1.86 (Clef Omni).
 - First timing results (2026-10-18, contended by a concurrent `pytest`, so
   pessimistic): DeBERTa-v3-large 0.8 pairs/s (~6.4 h for pair_test + cand_k20),
   DeBERTa-v3-base 2.5 pairs/s (~2.1 h). Even uncontended, large models are
-  expected around 3 pairs/s, so the 900M–1.5B Microsoft DeBERTa models likely
-  need the hosted option. Re-time contended models with
+  expected around 3 pairs/s, so the 900M–1.5B Microsoft DeBERTa models need
+  `cbench.nli_modal`. Re-time contended models with
   `cbench.nli time --models <id>` after deleting their entry from
   `results/nli_timing.json`; already-cached pairs are skipped, so it samples new ones.
 - Python 3.12 via uv (system Python is 3.14, too new for some wheels).

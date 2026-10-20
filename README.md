@@ -3,7 +3,7 @@
 How well do shipped, off-the-shelf models find self-contradictions in real documents?
 
 This benchmark runs 20 hosted decision models (every decision model on OpenRouter, plus SubQ
-Snap) and 12 public 3-way NLI models on [ContraDoc](https://github.com/ddhruvkr/CONTRADOC)
+Snap) and 19 public 3-way NLI models on [ContraDoc](https://github.com/ddhruvkr/CONTRADOC)
 (Li et al., NAACL 2024): 891 documents, 449 with a planted contradiction and 442 without. Every
 number below is on a held-out test split of 624 documents, with thresholds tuned on a separate
 dev split and 95% bootstrap intervals.
@@ -36,7 +36,7 @@ models apart from how candidate pairs are found.
 - **Classifying a pair is not the same as finding a contradiction in a document.** Given the gold
   pair, the best NLI model (tasksource DeBERTa-v3-large, AUROC 0.870) is statistically tied
   with the best decision model (Perplexity Decider v1.2, 0.892). Given a whole document, the
-  best NLI pipeline reaches only 0.659, while D1 Ultra reading the whole document reaches 0.854.
+  best NLI pipeline (Microsoft DeBERTa-v2-xxlarge) reaches only 0.666, while D1 Ultra reading the whole document reaches 0.854.
 - **Candidate retrieval is the bottleneck for pairwise methods.** The top 20 TF-IDF sentence
   pairs contain the gold pair in only 59.5% of documents. BM25, dense retrievers and hybrids do
   no better at K=20, because contradicting sentences often aren't similar: 12% of gold pairs
@@ -58,7 +58,7 @@ models apart from how candidate pairs are found.
 ![Document-level AUROC against estimated run cost](docs/img/doc_cost_vs_auroc.png)
 
 Each point is one system and configuration, with its 95% bootstrap interval. The dashed line
-traces the best-value frontier. NLI models run locally and are free; the dotted line marks the
+traces the best-value frontier. NLI models are open weights, plotted as free; the dotted line marks the
 best of them. Costs are estimates: catalogue price × estimated tokens.
 
 <details>
@@ -109,9 +109,9 @@ Full tables, including per-type, per-scope and per-length breakdowns, are in
 
 - ScaleDown Classify-1 is not run, because it can't accept the shared request body. GPT-6 Luna's
   native run is missing one document, which the provider refuses.
-- 7 of the 19 NLI models in `cbench.nli` were too slow to finish on CPU: the three MoritzLaurer
-  DeBERTa models, VitaminC ALBERT-xlarge, and Microsoft DeBERTa xlarge, v2-xlarge and
-  v2-xxlarge.
+- 12 NLI models ran on CPU. The other 7 (the three MoritzLaurer DeBERTa models, VitaminC
+  ALBERT-xlarge, and Microsoft DeBERTa xlarge, v2-xlarge and v2-xxlarge) ran on a Modal T4 GPU,
+  which took about 1.5 GPU-hours. GPU and CPU scores agree to within 1.2e-6.
 - Decision models were not run on the top-20 candidate pairs, which would cost about $6 more.
 
 ## Reproduce
@@ -120,7 +120,7 @@ Requires Python 3.12 and [uv](https://docs.astral.sh/uv/). Torch installs from t
 
 ### From the published scores (minutes, no API keys)
 
-Every score behind the results is published as a release asset (22 MB). Restore it and
+Every score behind the results is published as a release asset (28 MB). Restore it and
 rebuild the report:
 
 ```bash
@@ -140,6 +140,7 @@ uv run python -m cbench.fetch            # ContraDoc at a pinned commit, sha256-
 uv run python -m cbench.candidates --k 20
 
 uv run python -m cbench.nli sweep        # local NLI models, hours on CPU
+uv run python -m cbench.nli_modal        # or on a Modal GPU (`modal token new` first)
 uv run python -m cbench.sweep catalog    # live OpenRouter decision-model catalogue
 uv run python -m cbench.sweep estimate   # token and cost estimate
 uv run python -m cbench.sweep probe
@@ -171,6 +172,7 @@ The explorer has a cost-vs-AUROC leaderboard and a page for comparing systems.
 | `cbench.data` | sentence splitting, gold evidence location, dev/test split |
 | `cbench.candidates` | `pair_test` and top-K TF-IDF candidate pairs |
 | `cbench.nli` | 3-way NLI scoring |
+| `cbench.nli_modal` | the same NLI scoring on a Modal GPU |
 | `cbench.decide` | decision-model client (OpenRouter, Vercel AI Gateway, SubQ) |
 | `cbench.sweep` | decision-model catalogue, cost estimate, probe and run |
 | `cbench.verify` | find → verify and find → explain over native runs |

@@ -128,7 +128,7 @@ def score_model(model_name: str, pairs_name: str, *, limit: int | None = None, b
             f.flush()
             scored = min(start + flush_every, len(pending))
             rate = scored / (time.perf_counter() - started)
-            print(f"  {scored}/{len(pending)} pairs, {rate:.1f} pairs/s", flush=True)
+            print(f"  {model_name} {pairs_name}: {scored}/{len(pending)} pairs, {rate:.1f} pairs/s", flush=True)
     return len(pending), time.perf_counter() - started
 
 
