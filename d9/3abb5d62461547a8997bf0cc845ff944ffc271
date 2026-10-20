@@ -1,0 +1,22 @@
+README.md
+  s_8b4212e59d492d::t_ec7d9dd99b7198 117-121
+AGENTS.md
+  s_8b4212e59d492d::t_810bf333beb57d 23-24
+  s_8b4212e59d492d::t_17c744c744b27f 180-196
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d93abb5d62461547a8997bf0cc845ff944ffc271",
+  "prompts": {},
+  "sessions": {
+    "s_8b4212e59d492d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ac20e767-1d02-44fe-9d1c-a1ac516695d4",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Nathan Standiford <1041945+nstandif@users.noreply.github.com>"
+    }
+  }
+}
