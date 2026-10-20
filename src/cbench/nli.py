@@ -9,6 +9,7 @@ import argparse
 import json
 import random
 import time
+from collections.abc import Callable
 
 import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
@@ -58,9 +59,10 @@ def label_index(id2label: dict, name: str) -> int:
 
 
 class NLIScorer:
-    def __init__(self, model_name: str, batch_size: int) -> None:
+    def __init__(self, model_name: str, batch_size: int, device: str = "cpu") -> None:
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.model = AutoModelForSequenceClassification.from_pretrained(model_name).eval()
+        self.model = AutoModelForSequenceClassification.from_pretrained(model_name).eval().to(device)
+        self.device = device
         self.contradiction = label_index(self.model.config.id2label, "contradiction")
         self.entailment = label_index(self.model.config.id2label, "entailment")
         self.batch_size = batch_size
@@ -69,8 +71,8 @@ class NLIScorer:
     def probabilities(self, premises: list[str], hypotheses: list[str]) -> torch.Tensor:
         batch = self.tokenizer(
             premises, hypotheses, truncation=True, max_length=MAX_TOKENS, padding=True, return_tensors="pt"
-        )
-        return self.model(**batch).logits.softmax(-1)
+        ).to(self.device)
+        return self.model(**batch).logits.softmax(-1).cpu()
 
     def score(self, pairs: list[Pair]) -> list[dict]:
         rows = []
@@ -106,14 +108,15 @@ def pending_pairs(model_name: str, pairs_name: str, limit: int | None) -> list[P
     return pending
 
 
-def score_model(model_name: str, pairs_name: str, *, limit: int | None = None, batch_size: int = 32) -> tuple[int, float]:
+def score_model(model_name: str, pairs_name: str, *, limit: int | None = None, batch_size: int = 32,
+                make_scorer: Callable[[str, int], NLIScorer] = NLIScorer) -> tuple[int, float]:
     """Score pending pairs; returns (pairs scored, seconds spent scoring, excluding model load)."""
     pending = pending_pairs(model_name, pairs_name, limit)
     print(f"{model_name} {pairs_name}: {len(pending)} pending", flush=True)
     if not pending:
         return 0, 0.0
     pending.sort(key=lambda p: len(p.a) + len(p.b))
-    scorer = NLIScorer(model_name, batch_size)
+    scorer = make_scorer(model_name, batch_size)
     out = cache_path(model_name, pairs_name)
     out.parent.mkdir(parents=True, exist_ok=True)
     started = time.perf_counter()
