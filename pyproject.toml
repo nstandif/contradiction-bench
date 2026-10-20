@@ -2,6 +2,9 @@
 name = "cbench"
 version = "0.1.0"
 description = "Compare contradiction detectors (decision models vs NLI models) on ContraDoc"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "httpx>=0.27",
@@ -16,6 +19,7 @@ dependencies = [
 
 [dependency-groups]
 app = [
+    "kaleido>=1.5.0",
     "plotly>=7.1.0",
     "streamlit>=1.66.0",
 ]
