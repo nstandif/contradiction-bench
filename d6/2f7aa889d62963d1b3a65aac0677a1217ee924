@@ -1,0 +1,24 @@
+README.md
+  s_3303618dbb450a::t_c3f19fe0ba881b 121-136
+AGENTS.md
+  s_3303618dbb450a::t_8eedfb659953ce 31-32
+src/cbench/fetch.py
+  s_3303618dbb450a::t_45ca98eabd4e6c 1,3-7,9-10,13,19-21,24-32,36,42-54
+  s_3303618dbb450a::t_b5328661c2aedb 55-56
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d62f7aa889d62963d1b3a65aac0677a1217ee924",
+  "prompts": {},
+  "sessions": {
+    "s_3303618dbb450a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f353260a-f2fb-4b8a-a780-4da005be9226",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Nathan Standiford <nbstandiford@gmail.com>"
+    }
+  }
+}
