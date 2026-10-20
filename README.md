@@ -2,7 +2,7 @@
 
 How well do shipped, off-the-shelf models find self-contradictions in real documents?
 
-This benchmark runs 20 hosted decision models (every decision model on OpenRouter, plus SubQ
+This benchmark runs 21 hosted decision models (every decision model on OpenRouter, plus SubQ
 Snap) and 19 public 3-way NLI models on [ContraDoc](https://github.com/ddhruvkr/CONTRADOC)
 (Li et al., NAACL 2024): 891 documents, 449 with a planted contradiction and 442 without. Every
 number below is on a held-out test split of 624 documents, with thresholds tuned on a separate
@@ -101,14 +101,16 @@ Full tables, including per-type, per-scope and per-length breakdowns, are in
   same documents for both systems, so it is much tighter than the per-system intervals.
 - **NLI** scores both directions of each pair and takes the max contradiction probability.
 - **Decision models** all get the same request body through OpenRouter's decisions API or
-  SubQ's direct API. Each model is probed once with the longest input before the full run, so
+  SubQ's direct API. ScaleDown Classify-1 only accepts a string state, so it gets the same JSON
+  serialised as a string. Each model is probed once with the longest input before the full run, so
   an undocumented size cap shows up early.
 - **Partial runs are not reported.** A system appears only if it scored every item of an input.
 
 ### Coverage and gaps
 
-- ScaleDown Classify-1 is not run, because it can't accept the shared request body. GPT-6 Luna's
-  native run is missing one document, which the provider refuses.
+- GPT-6 Luna's native rows carry an asterisk: OpenAI refuses one of its 32,173 questions
+  (sentence 51 of one document, not part of the contradiction) on every attempt. Native scoring
+  drops a refused question, asks the rest again, and counts the refused one as "no".
 - 12 NLI models ran on CPU. The other 7 (the three MoritzLaurer DeBERTa models, VitaminC
   ALBERT-xlarge, and Microsoft DeBERTa xlarge, v2-xlarge and v2-xxlarge) ran on a Modal T4 GPU,
   which took about 1.5 GPU-hours. GPU and CPU scores agree to within 1.2e-6.

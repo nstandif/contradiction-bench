@@ -141,12 +141,12 @@
   },
   "scaledown/classify-1": {
     "native": {
-      "error": "RuntimeError('400 from https://openrouter.ai/api/alpha/decisions: {\"error\":{\"message\":\"ScaleDown state must be a string or an object with only text, document, and document_mime_type, including text or document\",\"code\":400}}')",
-      "ok": false
+      "error": null,
+      "ok": true
     },
     "pair_test": {
-      "error": "RuntimeError('400 from https://openrouter.ai/api/alpha/decisions: {\"error\":{\"message\":\"ScaleDown state must be a string or an object with only text, document, and document_mime_type, including text or document\",\"code\":400}}')",
-      "ok": false
+      "error": null,
+      "ok": true
     }
   },
   "subq-snap-preview": {

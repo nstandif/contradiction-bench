@@ -16,8 +16,8 @@ COMMIT = "d1c42d1e433595dd6e98fab7b669722cdc050b1d"
 URL = f"https://raw.githubusercontent.com/ddhruvkr/CONTRADOC/{COMMIT}/ContraDoc.json"
 SHA256 = "def2213b8c6314353614ddadd0c8bbefeb883a2ccd4ebfcacacf10e8754e158c"
 
-CACHE_URL = "https://github.com/nstandif/contradiction-bench/releases/download/cache-2026-10-20/results-cache.tar.gz"
-CACHE_SHA256 = "48333e637415424695fd609db0cc5754aa4bc487929155f74aaa9870159fe2ad"
+CACHE_URL = "https://github.com/nstandif/contradiction-bench/releases/download/cache-2026-10-21/results-cache.tar.gz"
+CACHE_SHA256 = "e32940505a89774e27dfaa7b93b9fb77c5743dee1ac3c6be78f6ab1f2b716b81"
 
 
 def main() -> None:

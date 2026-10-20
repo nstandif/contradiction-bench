@@ -10,11 +10,14 @@ models detect self-contradictions in real documents?
 As of 2026-10-19: **first full sweep done**; `results/report.md` and
 `metrics.json` are committed and the Streamlit app reads them.
 
-- **Decision models:** 20 of 21 complete on `pair_test` and `native`.
-  ScaleDown Classify-1 failed its probe (it only accepts a state with `text` or
-  `document`, so it can't take the shared request body) and is not run. GPT-6 Luna
-  is missing one native document: OpenAI refuses question `s51` on it, so its
-  native run stays partial and unreported.
+- **Decision models:** 21 of 21 complete on `pair_test` and `native`.
+  ScaleDown Classify-1 rejects object states unless they hold only `text`/`document`,
+  so `decide.STRING_STATE_MODELS` sends it the same JSON as a string. It bills the
+  state once per question, so native costs about 11× the `sweep estimate` figure
+  ($2.52). OpenAI refuses GPT-6 Luna's question
+  `s51` on document `3499318685_4` on every retry. `decide.score_doc` drops refused
+  questions, re-asks the rest and records them in `refused`; the evaluator counts
+  them as "no" and marks the system with an asterisk.
 - **NLI:** 19 of 19 complete on `pair_test` and `cand_k20`. Twelve ran on CPU. The
   seven too slow for it (`results/nli_timing.json`: the three MoritzLaurer models,
   VitaminC ALBERT-xlarge, Microsoft deberta-xlarge, v2-xlarge and v2-xxlarge; 3–33 h

@@ -2014,6 +2014,67 @@
         ]
       }
     },
+    "scaledown/classify-1": {
+      "n_test": 530,
+      "auroc_test": 0.8159237536656893,
+      "auroc_ci95_test": [
+        0.7756249769485547,
+        0.8519145563462677
+      ],
+      "threshold": 0.20205264121796207,
+      "f1_test": 0.6876404494382022,
+      "accuracy_test": 0.7377358490566037,
+      "precision_test": 0.68,
+      "recall_test": 0.6954545454545454,
+      "n_scored": 763,
+      "auroc_by_type_all_splits": {
+        "Causal": {
+          "n_pos": 15,
+          "auroc": 0.7250377073906485
+        },
+        "Content": {
+          "n_pos": 212,
+          "auroc": 0.808599419448476
+        },
+        "Emotion/Mood/Feeling": {
+          "n_pos": 59,
+          "auroc": 0.7518598051997852
+        },
+        "Factual": {
+          "n_pos": 36,
+          "auroc": 0.7779034690799397
+        },
+        "Negation": {
+          "n_pos": 66,
+          "auroc": 0.8935965994789525
+        },
+        "Numeric": {
+          "n_pos": 55,
+          "auroc": 0.8291238173591116
+        },
+        "Other": {
+          "n_pos": 1,
+          "auroc": 0.9570135746606335
+        },
+        "Perspective/View/Opinion": {
+          "n_pos": 74,
+          "auroc": 0.7865048306224777
+        },
+        "Relation": {
+          "n_pos": 17,
+          "auroc": 0.7867979771093957
+        }
+      },
+      "order_gap": 0.06385951646229136,
+      "vs_best": {
+        "system": "perplexity/pplx-decider-v1.2",
+        "delta": 0.07587976539589425,
+        "ci95": [
+          0.043961259991901716,
+          0.10620707103012822
+        ]
+      }
+    },
     "subq-snap-preview": {
       "n_test": 530,
       "auroc_test": 0.8655571847507333,
@@ -6541,6 +6602,216 @@
         ]
       }
     },
+    "openai/gpt-6-luna-decisions [native:document]": {
+      "n_test": 624,
+      "auroc_test": 0.7147626874871584,
+      "auroc_ci95_test": [
+        0.6763652531819332,
+        0.7513063739672249
+      ],
+      "threshold": 0.0,
+      "f1_test": 0.6695095948827292,
+      "accuracy_test": 0.5032051282051282,
+      "precision_test": 0.5032051282051282,
+      "recall_test": 1.0,
+      "n_docs_scored": 891,
+      "auroc_by_length_tertile": {
+        "short": 0.6793671597079199,
+        "medium": 0.7005960800161648,
+        "long": 0.7598142676234698
+      },
+      "recall_by": {
+        "contra_type": {
+          "Causal": {
+            "n": 29,
+            "recall": 1.0
+          },
+          "Content": {
+            "n": 205,
+            "recall": 1.0
+          },
+          "Emotion/Mood/Feeling": {
+            "n": 61,
+            "recall": 1.0
+          },
+          "Factual": {
+            "n": 42,
+            "recall": 1.0
+          },
+          "Negation": {
+            "n": 60,
+            "recall": 1.0
+          },
+          "Numeric": {
+            "n": 49,
+            "recall": 1.0
+          },
+          "Other": {
+            "n": 1,
+            "recall": 1.0
+          },
+          "Perspective/View/Opinion": {
+            "n": 66,
+            "recall": 1.0
+          },
+          "Relation": {
+            "n": 17,
+            "recall": 1.0
+          }
+        },
+        "scope": {
+          "global": {
+            "n": 105,
+            "recall": 1.0
+          },
+          "global+intra": {
+            "n": 1,
+            "recall": 1.0
+          },
+          "intra": {
+            "n": 54,
+            "recall": 1.0
+          },
+          "local": {
+            "n": 154,
+            "recall": 1.0
+          }
+        },
+        "doc_type": {
+          "news": {
+            "n": 109,
+            "recall": 1.0
+          },
+          "story": {
+            "n": 94,
+            "recall": 1.0
+          },
+          "wiki": {
+            "n": 111,
+            "recall": 1.0
+          }
+        }
+      },
+      "localization": {
+        "n": 314,
+        "hit@1": 0.20382165605095542,
+        "hit@3": 0.3630573248407643
+      },
+      "refused_questions": 1,
+      "vs_best": {
+        "system": "liquid/d1-ultra [native:document]",
+        "delta": 0.13887404972262174,
+        "ci95": [
+          0.10558839776313453,
+          0.17536541631070138
+        ]
+      }
+    },
+    "openai/gpt-6-luna-decisions [native:max-sentence]": {
+      "n_test": 624,
+      "auroc_test": 0.5779895212656667,
+      "auroc_ci95_test": [
+        0.5318827772582949,
+        0.6218588188160799
+      ],
+      "threshold": 0.2,
+      "f1_test": 0.6719817767653758,
+      "accuracy_test": 0.5384615384615384,
+      "precision_test": 0.5230496453900709,
+      "recall_test": 0.9394904458598726,
+      "n_docs_scored": 891,
+      "auroc_by_length_tertile": {
+        "short": 0.6350402546339637,
+        "medium": 0.5592543948272378,
+        "long": 0.5278176445757703
+      },
+      "recall_by": {
+        "contra_type": {
+          "Causal": {
+            "n": 29,
+            "recall": 0.896551724137931
+          },
+          "Content": {
+            "n": 205,
+            "recall": 0.9317073170731708
+          },
+          "Emotion/Mood/Feeling": {
+            "n": 61,
+            "recall": 0.9508196721311475
+          },
+          "Factual": {
+            "n": 42,
+            "recall": 0.9523809523809523
+          },
+          "Negation": {
+            "n": 60,
+            "recall": 1.0
+          },
+          "Numeric": {
+            "n": 49,
+            "recall": 0.9591836734693877
+          },
+          "Other": {
+            "n": 1,
+            "recall": 1.0
+          },
+          "Perspective/View/Opinion": {
+            "n": 66,
+            "recall": 0.8787878787878788
+          },
+          "Relation": {
+            "n": 17,
+            "recall": 0.8235294117647058
+          }
+        },
+        "scope": {
+          "global": {
+            "n": 105,
+            "recall": 0.9619047619047619
+          },
+          "global+intra": {
+            "n": 1,
+            "recall": 1.0
+          },
+          "intra": {
+            "n": 54,
+            "recall": 0.9444444444444444
+          },
+          "local": {
+            "n": 154,
+            "recall": 0.922077922077922
+          }
+        },
+        "doc_type": {
+          "news": {
+            "n": 109,
+            "recall": 0.926605504587156
+          },
+          "story": {
+            "n": 94,
+            "recall": 0.8936170212765957
+          },
+          "wiki": {
+            "n": 111,
+            "recall": 0.990990990990991
+          }
+        }
+      },
+      "localization": {
+        "n": 314,
+        "hit@1": 0.20382165605095542,
+        "hit@3": 0.3630573248407643
+      },
+      "refused_questions": 1,
+      "vs_best": {
+        "system": "liquid/d1-ultra [native:document]",
+        "delta": 0.27564721594411346,
+        "ci95": [
+          0.22933845576445666,
+          0.3230267717960455
+        ]
+      }
+    },
     "perplexity/pplx-decider-flash-v1.2 [native:document]": {
       "n_test": 624,
       "auroc_test": 0.7408259708239161,
@@ -7273,6 +7544,214 @@
         "ci95": [
           0.054347069057381577,
           0.12007971548244957
+        ]
+      }
+    },
+    "scaledown/classify-1 [native:document]": {
+      "n_test": 624,
+      "auroc_test": 0.7179422642284774,
+      "auroc_ci95_test": [
+        0.6794899674453627,
+        0.756076503683165
+      ],
+      "threshold": 0.33175012029691275,
+      "f1_test": 0.6761177753544165,
+      "accuracy_test": 0.5240384615384616,
+      "precision_test": 0.5140961857379768,
+      "recall_test": 0.9872611464968153,
+      "n_docs_scored": 891,
+      "auroc_by_length_tertile": {
+        "short": 0.7068432877738252,
+        "medium": 0.6765508183471407,
+        "long": 0.7695230054875475
+      },
+      "recall_by": {
+        "contra_type": {
+          "Causal": {
+            "n": 29,
+            "recall": 1.0
+          },
+          "Content": {
+            "n": 205,
+            "recall": 0.9853658536585366
+          },
+          "Emotion/Mood/Feeling": {
+            "n": 61,
+            "recall": 1.0
+          },
+          "Factual": {
+            "n": 42,
+            "recall": 0.9761904761904762
+          },
+          "Negation": {
+            "n": 60,
+            "recall": 1.0
+          },
+          "Numeric": {
+            "n": 49,
+            "recall": 0.9795918367346939
+          },
+          "Other": {
+            "n": 1,
+            "recall": 0.0
+          },
+          "Perspective/View/Opinion": {
+            "n": 66,
+            "recall": 0.9848484848484849
+          },
+          "Relation": {
+            "n": 17,
+            "recall": 0.9411764705882353
+          }
+        },
+        "scope": {
+          "global": {
+            "n": 105,
+            "recall": 0.9809523809523809
+          },
+          "global+intra": {
+            "n": 1,
+            "recall": 1.0
+          },
+          "intra": {
+            "n": 54,
+            "recall": 0.9814814814814815
+          },
+          "local": {
+            "n": 154,
+            "recall": 0.9935064935064936
+          }
+        },
+        "doc_type": {
+          "news": {
+            "n": 109,
+            "recall": 0.963302752293578
+          },
+          "story": {
+            "n": 94,
+            "recall": 1.0
+          },
+          "wiki": {
+            "n": 111,
+            "recall": 1.0
+          }
+        }
+      },
+      "localization": {
+        "n": 314,
+        "hit@1": 0.35668789808917195,
+        "hit@3": 0.5222929936305732
+      },
+      "vs_best": {
+        "system": "liquid/d1-ultra [native:document]",
+        "delta": 0.13569447298130277,
+        "ci95": [
+          0.09685056191992822,
+          0.1759480189115577
+        ]
+      }
+    },
+    "scaledown/classify-1 [native:max-sentence]": {
+      "n_test": 624,
+      "auroc_test": 0.7445808506266695,
+      "auroc_ci95_test": [
+        0.7028034136878848,
+        0.7844716937403544
+      ],
+      "threshold": 0.5349568823292796,
+      "f1_test": 0.6894031668696712,
+      "accuracy_test": 0.5913461538461539,
+      "precision_test": 0.5581854043392505,
+      "recall_test": 0.9012738853503185,
+      "n_docs_scored": 891,
+      "auroc_by_length_tertile": {
+        "short": 0.6857798165137615,
+        "medium": 0.7083249141240655,
+        "long": 0.8300126635711271
+      },
+      "recall_by": {
+        "contra_type": {
+          "Causal": {
+            "n": 29,
+            "recall": 0.7931034482758621
+          },
+          "Content": {
+            "n": 205,
+            "recall": 0.9073170731707317
+          },
+          "Emotion/Mood/Feeling": {
+            "n": 61,
+            "recall": 0.8852459016393442
+          },
+          "Factual": {
+            "n": 42,
+            "recall": 0.8571428571428571
+          },
+          "Negation": {
+            "n": 60,
+            "recall": 0.9333333333333333
+          },
+          "Numeric": {
+            "n": 49,
+            "recall": 0.9795918367346939
+          },
+          "Other": {
+            "n": 1,
+            "recall": 1.0
+          },
+          "Perspective/View/Opinion": {
+            "n": 66,
+            "recall": 0.9090909090909091
+          },
+          "Relation": {
+            "n": 17,
+            "recall": 0.8235294117647058
+          }
+        },
+        "scope": {
+          "global": {
+            "n": 105,
+            "recall": 0.9714285714285714
+          },
+          "global+intra": {
+            "n": 1,
+            "recall": 1.0
+          },
+          "intra": {
+            "n": 54,
+            "recall": 0.8518518518518519
+          },
+          "local": {
+            "n": 154,
+            "recall": 0.8701298701298701
+          }
+        },
+        "doc_type": {
+          "news": {
+            "n": 109,
+            "recall": 0.8715596330275229
+          },
+          "story": {
+            "n": 94,
+            "recall": 0.851063829787234
+          },
+          "wiki": {
+            "n": 111,
+            "recall": 0.972972972972973
+          }
+        }
+      },
+      "localization": {
+        "n": 314,
+        "hit@1": 0.35668789808917195,
+        "hit@3": 0.5222929936305732
+      },
+      "vs_best": {
+        "system": "liquid/d1-ultra [native:document]",
+        "delta": 0.10905588658311072,
+        "ci95": [
+          0.06798553947764015,
+          0.14970443180501863
         ]
       }
     },
@@ -8752,16 +9231,5 @@
     "precision": 0.5032051282051282,
     "recall": 1.0
   },
-  "incomplete": [
-    [
-      "openai/gpt-6-luna-decisions",
-      "native",
-      "890/891"
-    ],
-    [
-      "scaledown/classify-1",
-      "pair_test",
-      "0/763"
-    ]
-  ]
+  "incomplete": []
 }
