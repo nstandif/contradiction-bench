@@ -66,7 +66,7 @@ def system_rows(metrics: dict, level: str, prices: dict[str, float], tokens: dic
             "system": system,
             "config": config,
             "family": family(system),
-            "label": label(system, config),
+            "label": label(system, config) + ("*" if r.get("refused_questions") else ""),
             "auroc": r["auroc_test"],
             "ci_lo": ci[0],
             "ci_hi": ci[1],
@@ -94,7 +94,7 @@ def explain_rows(metrics: dict, prices: dict[str, float], tokens: dict[str, int]
         rows.append({
             "name": name,
             "family": family(system),
-            "label": label(system, config),
+            "label": label(system, config) + ("*" if r.get("refused_questions") else ""),
             "pair1": r["pair@1"],
             "ci_lo": r["pair@1_ci95"][0],
             "ci_hi": r["pair@1_ci95"][1],

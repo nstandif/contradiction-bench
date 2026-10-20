@@ -1,3 +1,4 @@
+import asyncio
 import json
 import random
 
@@ -8,7 +9,7 @@ import pytest
 from cbench import evaluate, verify
 from cbench.candidates import read_pairs
 from cbench.data import load_docs, locate, parse_scope, split_sentences
-from cbench.decide import MODELS, chunked, resolve_model
+from cbench.decide import MODELS, REFUSAL, Refused, chunked, decide_skipping_refusals, resolve_model, wire_state
 from cbench.evaluate import tune_threshold
 from cbench.paths import CONTRADOC_JSON, WORK
 
@@ -87,6 +88,26 @@ def test_chunked_respects_question_limit():
     chunks = chunked({f"q{i}": {} for i in range(37)}, 16)
     assert [len(c) for c in chunks] == [16, 16, 5]
     assert list(chunks[0])[0] == "q0"
+
+
+def test_wire_state_sends_scaledown_the_same_json_as_a_string():
+    state = {"sentences": [{"id": 0, "text": "Zagreb – 1994"}]}
+    assert wire_state("liquid/d1-ultra", state) is state
+    assert json.loads(wire_state("scaledown/classify-1", state)) == state
+
+
+def test_refused_question_is_dropped_and_the_rest_reasked():
+    class RefusesS1:
+        async def decide(self, state, questions):
+            if "s1" in questions:
+                raise Refused("s1", "refused")
+            return {"answers": {k: {"noul": 0.5} for k in questions}}
+
+    result, refused = asyncio.run(decide_skipping_refusals(RefusesS1(), {}, {"s0": {}, "s1": {}, "s2": {}}))
+    assert refused == ["s1"]
+    assert set(result["answers"]) == {"s0", "s2"}
+    body = '{"error":{"message":"OpenAI refused to answer question \\"s51\\"","code":502}}'
+    assert REFUSAL.search(body)["question"] == "s51"
 
 
 def test_tune_threshold_maximises_f1():

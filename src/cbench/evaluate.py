@@ -32,6 +32,7 @@ class System:
     pipelines: dict[str, dict] = field(default_factory=dict)
     verify_rows: list[dict] = field(default_factory=list)
     incomplete: dict[str, str] = field(default_factory=dict)
+    refused_questions: int = 0
 
 
 def read_jsonl(path: Path) -> list[dict]:
@@ -87,9 +88,11 @@ def discover_systems() -> list[System]:
         if native and len(native) < len(doc_fingerprints):
             system.incomplete["native"] = f"{len(native)}/{len(doc_fingerprints)}"
         elif native:
-            system.doc_scores["native:document"] = {r["key"]: r["p_document"] for r in native}
-            system.doc_scores["native:max-sentence"] = {r["key"]: max(r["p_sentences"]) for r in native}
-            system.sentence_scores["native"] = {r["key"]: r["p_sentences"] for r in native}
+            system.refused_questions = sum(len(r.get("refused", [])) for r in native)
+            sentences = {r["key"]: [p or 0.0 for p in r["p_sentences"]] for r in native}
+            system.doc_scores["native:document"] = {r["key"]: r["p_document"] or 0.0 for r in native}
+            system.doc_scores["native:max-sentence"] = {k: max(v) for k, v in sentences.items()}
+            system.sentence_scores["native"] = sentences
         _add_verify(system, model_dir, doc_fingerprints)
         systems.append(system)
     return systems
@@ -291,11 +294,12 @@ def doc_level(systems: list[System], source: str) -> dict:
     for system in systems:
         if source in system.pair_scores:
             doc_scores, sentence_scores = doc_scores_from_pairs(system.pair_scores[source])
-            configurations.append((f"{system.name} [{source}]", doc_scores, sentence_scores, None))
+            configurations.append((f"{system.name} [{source}]", doc_scores, sentence_scores, None, {}))
         for name, scores in system.doc_scores.items():
             sentences = system.sentence_scores.get(name, system.sentence_scores.get("native", {}))
-            configurations.append((f"{system.name} [{name}]", scores, sentences, system.pipelines.get(name)))
-    for name, doc_scores, sentence_scores, pipeline in configurations:
+            extra = {"refused_questions": system.refused_questions} if system.refused_questions else {}
+            configurations.append((f"{system.name} [{name}]", scores, sentences, system.pipelines.get(name), extra))
+    for name, doc_scores, sentence_scores, pipeline, extra in configurations:
         result = evaluate_scores(doc_scores, lambda k: docs[k].label, lambda k: splits[k])
         if result is None:
             continue
@@ -307,6 +311,7 @@ def doc_level(systems: list[System], source: str) -> dict:
             "recall_by": recall_breakdown(predicted, docs),
             "localization": localization(sentence_scores, docs, splits),
             **({"pipeline": pipeline} if pipeline else {}),
+            **extra,
         }
     add_paired_deltas(results)
     return results
@@ -434,10 +439,14 @@ def render(report: dict) -> str:
     ]
     for name, r in sorted(report["doc_level"].items(), key=lambda x: -(x[1]["auroc_test"] or 0)):
         loc = r["localization"]
+        mark = "*" if r.get("refused_questions") else ""
         lines.append(
-            f"| {name} | {_auroc(r)} | {_gap(r)} | {_f(r['f1_test'])} | {_f(r['accuracy_test'])} | {_f(r['precision_test'])} "
+            f"| {name}{mark} | {_auroc(r)} | {_gap(r)} | {_f(r['f1_test'])} | {_f(r['accuracy_test'])} | {_f(r['precision_test'])} "
             f"| {_f(r['recall_test'])} | {_f(loc['hit@1'])} | {_f(loc['hit@3'])} | {r['n_docs_scored']} |"
         )
+    if refused := {n.split(" [")[0]: r["refused_questions"] for n, r in report["doc_level"].items() if r.get("refused_questions")}:
+        lines += ["", "\\* The provider refused some questions, which count as \"no\": "
+                  + ", ".join(f"{name} ({n})" for name, n in sorted(refused.items())) + "."]
     if report.get("explain"):
         n = next(iter(report["explain"].values()))["n"]
         lines += [

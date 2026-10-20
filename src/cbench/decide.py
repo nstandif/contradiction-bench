@@ -19,6 +19,7 @@ import asyncio
 import json
 import os
 import random
+import re
 from dataclasses import dataclass
 
 import httpx
@@ -31,6 +32,17 @@ RETRY_STATUSES = {429, 500, 502, 503, 504}
 MAX_ATTEMPTS = 6
 SAMPLE_SEED = 0
 QUESTIONS_PER_REQUEST = 16  # SubQ's cap; applied to every model so requests stay identical
+# ScaleDown rejects object states unless they hold only text/document fields; it takes the same JSON as a string.
+STRING_STATE_MODELS = {"scaledown/classify-1"}
+
+
+REFUSAL = re.compile(r'refused to answer question \\?"(?P<question>[^"\\]+)')
+
+
+class Refused(RuntimeError):
+    def __init__(self, question: str, message: str) -> None:
+        super().__init__(message)
+        self.question = question
 
 
 @dataclass(frozen=True)
@@ -103,6 +115,10 @@ def chunked(questions: dict, size: int) -> list[dict]:
     return [dict(items[i : i + size]) for i in range(0, len(items), size)]
 
 
+def wire_state(model: str, state: dict) -> dict | str:
+    return json.dumps(state, ensure_ascii=False) if model in STRING_STATE_MODELS else state
+
+
 def resolve_model(gateway: str, alias: str | None, slug: str | None) -> str:
     if slug:
         return slug
@@ -134,10 +150,12 @@ class Client:
         self.semaphore = asyncio.Semaphore(concurrency)
 
     async def decide(self, state: dict, questions: dict) -> dict:
-        body = {"model": self.model, "state": state, "questions": questions}
+        body = {"model": self.model, "state": wire_state(self.model, state), "questions": questions}
         async with self.semaphore:
             response = await self._post(body)
         if response.is_error:
+            if match := REFUSAL.search(response.text):
+                raise Refused(match["question"], response.text[:500])
             raise RuntimeError(f"{response.status_code} from {self.gateway.url}: {response.text[:500]}")
         return response.json()
 
@@ -150,7 +168,8 @@ class Client:
                     raise RuntimeError(f"network error after {MAX_ATTEMPTS} attempts: {error!r}") from error
                 await asyncio.sleep(_backoff(attempt))
                 continue
-            if response.status_code not in RETRY_STATUSES or attempt == MAX_ATTEMPTS - 1:
+            refused = REFUSAL.search(response.text) is not None
+            if response.status_code not in RETRY_STATUSES or refused or attempt == MAX_ATTEMPTS - 1:
                 return response
             await asyncio.sleep(_retry_delay(response, attempt))
         raise AssertionError("unreachable")
@@ -191,20 +210,37 @@ async def score_pair(client: Client, pair: Pair) -> dict:
     }
 
 
+async def decide_skipping_refusals(client: Client, state: dict, questions: dict) -> tuple[dict | None, list[str]]:
+    """A provider refusal names one question; drop it and ask the rest again."""
+    refused = []
+    while questions:
+        try:
+            return await client.decide(state, questions), refused
+        except Refused as refusal:
+            if refusal.question not in questions:
+                raise
+            refused.append(refusal.question)
+            questions = {k: v for k, v in questions.items() if k != refusal.question}
+    return None, refused
+
+
 async def score_doc(client: Client, doc: Doc) -> dict:
     state = native_state(doc)
-    results = await asyncio.gather(
-        *(client.decide(state, q) for q in chunked(native_questions(doc), QUESTIONS_PER_REQUEST))
+    outcomes = await asyncio.gather(
+        *(decide_skipping_refusals(client, state, q) for q in chunked(native_questions(doc), QUESTIONS_PER_REQUEST))
     )
+    results = [r for r, _ in outcomes if r is not None]
+    refused = [q for _, qs in outcomes for q in qs]
     answers = {name: a["noul"] for r in results for name, a in r["answers"].items()}
-    return {
+    row = {
         "key": doc.id,
         "fingerprint": doc.fingerprint,
-        "p_document": answers["document"],
-        "p_sentences": [answers[f"s{i}"] for i in range(len(doc.sentences))],
-        "served_model": served_model(results[0]),
+        "p_document": answers.get("document"),
+        "p_sentences": [answers.get(f"s{i}") for i in range(len(doc.sentences))],
+        "served_model": served_model(results[0]) if results else None,
         "usage": [r.get("usage") for r in results],
     }
+    return {**row, "refused": refused} if refused else row
 
 
 def cache_path(model: str, mode: str, source: str):
@@ -226,7 +262,7 @@ def first_request(model: str, mode: str, items: list[Pair] | list[Doc]) -> dict:
         state, questions = {"sentence_a": items[0].a, "sentence_b": items[0].b}, pair_questions()
     else:
         state, questions = native_state(items[0]), native_questions(items[0])
-    return {"model": model, "state": state, "questions": chunked(questions, QUESTIONS_PER_REQUEST)[0]}
+    return {"model": model, "state": wire_state(model, state), "questions": chunked(questions, QUESTIONS_PER_REQUEST)[0]}
 
 
 def require_key(gateway: Gateway) -> str:
