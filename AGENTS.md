@@ -28,7 +28,8 @@ As of 2026-10-19: **first full sweep done**; `results/report.md` and
   in 61.8% of documents. Verifiers run so far: Decider v1.2 and D1 Ultra, cached as
   `verify_all.jsonl` under each model's cache directory.
 
-To re-run anything: set up the checkout (`uv sync --all-groups &&
+To rebuild the report from published scores: `uv run python -m cbench.fetch --cache`,
+then `cbench.candidates --k 20` and `cbench.evaluate`. To re-run anything: set up the checkout (`uv sync --all-groups &&
 uv run python -m cbench.fetch && uv run python -m cbench.candidates --k 20`),
 put `OPENROUTER_API_KEY` and `SUBQ_API_KEY` in `.env`, then rerun the scorers;
 they resume from `results/cache/`. Rebuild with `cbench.evaluate` and commit

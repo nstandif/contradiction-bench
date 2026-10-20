@@ -118,6 +118,22 @@ Full tables, including per-type, per-scope and per-length breakdowns, are in
 
 Requires Python 3.12 and [uv](https://docs.astral.sh/uv/). Torch installs from the CPU index.
 
+### From the published scores (minutes, no API keys)
+
+Every score behind the results is published as a release asset (22 MB). Restore it and
+rebuild the report:
+
+```bash
+uv sync --all-groups
+uv run python -m cbench.fetch --cache    # ContraDoc + run caches, sha256-checked
+uv run python -m cbench.candidates --k 20
+uv run python -m cbench.evaluate
+```
+
+`--cache` overwrites matching files in `results/cache/`.
+
+### From scratch
+
 ```bash
 uv sync --all-groups
 uv run python -m cbench.fetch            # ContraDoc at a pinned commit, sha256-checked
