@@ -1,0 +1,30 @@
+tests/test_cbench.py
+  s_3303618dbb450a::t_0c7627fc6df57e 93-96
+  s_3303618dbb450a::t_98986b4ac46ea8 1,12,97-110
+  s_3303618dbb450a::t_94d43ba72a5caf 111-112
+src/cbench/decide.py
+  s_3303618dbb450a::t_e32d47edcac5fe 35-36,118-121,153,265
+  s_3303618dbb450a::t_07304761a4d642 22,39-45,157-158,171-172,213-226,229-230,232-233,235,238-240,243
+  s_3303618dbb450a::t_5e3981ec17efb7 37-38
+src/cbench/evaluate.py
+  s_3303618dbb450a::t_43da4f8df7fb66 447-449
+  s_3303618dbb450a::t_4a8ea61c3bcfd0 35,91-95,297,300-302,314,442,444
+src/cbench/dashboard.py
+  s_3303618dbb450a::t_43da4f8df7fb66 69,97
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ea4c360fe0c15d0f156ab7f079dc2d4a9d1a27b7",
+  "prompts": {},
+  "sessions": {
+    "s_3303618dbb450a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f353260a-f2fb-4b8a-a780-4da005be9226",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Nathan Standiford <1041945+nstandif@users.noreply.github.com>"
+    }
+  }
+}
