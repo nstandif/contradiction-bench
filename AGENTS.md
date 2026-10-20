@@ -5,9 +5,9 @@ hosted decision model on OpenRouter plus SubQ Snap, against 19 public 3-way NLI
 models run locally. The question it answers: how well do shipped, off-the-shelf
 models detect self-contradictions in real documents?
 
-## Start here (handoff)
+## Status
 
-State as of 2026-10-18: **first full sweep done**; `results/report.md` and
+As of 2026-10-19: **first full sweep done**; `results/report.md` and
 `metrics.json` are committed and the Streamlit app reads them.
 
 - **Decision models:** 20 of 21 complete on `pair_test` and `native`.
@@ -19,8 +19,7 @@ State as of 2026-10-18: **first full sweep done**; `results/report.md` and
   too slow on this CPU (`results/nli_timing.json`): the three MoritzLaurer models
   (3–9 h each; 3–4× slower than the same-size cross-encoder models for a reason
   not yet found), VitaminC ALBERT-xlarge (6 h) and Microsoft deberta-xlarge,
-  v2-xlarge and v2-xxlarge (4, 17, 33 h). Running them needs "Hosted NLI" below,
-  which the user hasn't chosen yet.
+  v2-xlarge and v2-xxlarge (4, 17, 33 h). Running them needs "Hosted NLI" below.
 - **Not run:** `cand_k20` for decision models (about $6 more).
 - **Find → verify / explain** (`cbench.verify`, `results/verify.md`): native sentence scores
   shortlist suspicious sentences, then a verifier reads the whole document and answers "which
@@ -36,10 +35,7 @@ they resume from `results/cache/`. Rebuild with `cbench.evaluate` and commit
 `report.md`, `metrics.json`, `probe.json` and `nli_timing.json`; caches stay out
 of git.
 
-Ask the user before anything that costs money or takes hours of compute. They
-have so far approved: the NLI sweep (all 19 models), the decision-model sweep
-(all OpenRouter models plus SubQ Snap), and Perplexity Decider v1.2 in place
-of v1.1.
+Ask before anything that costs money or takes hours of compute.
 
 ## Why the full dataset
 
@@ -62,7 +58,8 @@ far better than it is.
 | `cbench.dashboard` + `app/` | Streamlit explorer over `results/metrics.json`: cost-vs-AUROC leaderboard, compare page |
 
 Run the explorer with `uv sync --group app && uv run streamlit run app/streamlit_app.py`;
-`CBENCH_METRICS=<path>` points it at another metrics file. Costs in the app are
+`CBENCH_METRICS=<path>` points it at another metrics file. Chart builders live in `app/charts.py`; `app/export_charts.py` renders them to
+`docs/img/` for the README, so rerun it after rebuilding the report. Costs in the app are
 estimates (catalogue price × `sweep estimate` tokens) and need `data/work`. Compare
 only shows gaps to the best system, because `metrics.json` stores no other paired
 gaps. `tests/test_app.py` skips unless the `app` group is installed.
@@ -131,7 +128,7 @@ models ship only `pytorch_model.bin`, loaded with torch's weights-only loader.
 
 ### Hosted NLI (for models too slow on CPU)
 
-Researched 2026-10-18; no option chosen yet.
+Researched 2026-10-18; not set up yet.
 - **Replicate:** only `bart-large-mnli`, wrapped as zero-shot classification.
   Wrong interface: it returns label scores, not premise/hypothesis 3-way probabilities.
 - **HF serverless (`hf-inference`):** a few of these models, also as
@@ -160,7 +157,7 @@ models plus SubQ Snap.
   sends one real request per model and test, using that test's longest input so
   a size cap fails the probe rather than the full run, into `results/probe.json`;
   `sweep run` only runs what passed.
-- **Perplexity Decider is v1.2** by the user's choice; v1.1 is no longer served
+- **Perplexity Decider is v1.2**; v1.1 is no longer served
   anywhere (Perplexity's API maps the v1.1 name to v1.2).
 - **SubQ Snap** is direct-API only, in public preview with limited capacity, and
   caps requests at 16 questions. Native mode uses 16-question chunks for every
@@ -187,7 +184,3 @@ $0.12 (Span-02, Decider Flash) to $1.86 (Clef Omni).
   `cbench.nli time --models <id>` after deleting their entry from
   `results/nli_timing.json`; already-cached pairs are skipped, so it samples new ones.
 - Python 3.12 via uv (system Python is 3.14, too new for some wheels).
-- A stale `VIRTUAL_ENV` from another project may be set in the shell; `unset
-  VIRTUAL_ENV` before `uv run` to silence the warning.
-- Edits on `main` are blocked by a hook outside worktrees; do work on a branch
-  in a worktree and fast-forward `main`.
