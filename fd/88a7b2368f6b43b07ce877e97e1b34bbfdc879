@@ -1,0 +1,25 @@
+.claude/rules/swamp.md
+  s_058e54092e6aef::t_946839b15b7d20 1-50
+.gitignore
+  s_058e54092e6aef::t_07281c71b9547a 10-24
+.swamp.yaml
+  s_058e54092e6aef::t_b9660d52620d3c 1-7
+vaults/local_encryption/6a65c1fb-c58a-421c-8fdf-0714f9d8b39a.yaml
+  s_058e54092e6aef::t_78f6feff6c5653 1-6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "fd88a7b2368f6b43b07ce877e97e1b34bbfdc879",
+  "prompts": {},
+  "sessions": {
+    "s_058e54092e6aef": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9cf2ab02-20c5-4cd1-b603-6406620eabea",
+        "model": "unknown"
+      },
+      "human_author": "Nathan Standiford <1041945+nstandif@users.noreply.github.com>"
+    }
+  }
+}
